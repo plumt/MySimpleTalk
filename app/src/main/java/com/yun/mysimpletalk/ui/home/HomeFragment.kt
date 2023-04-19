@@ -30,6 +30,5 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
 
             sv.showBottomNav()
         }
-
     }
 }
