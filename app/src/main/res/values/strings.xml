@@ -1,3 +1,10 @@
 <resources>
-    <string name="app_name">MySimpleTalk</string>
+    <string name="app_name">에어톡</string>
+
+    <string name="social_login_info_naver_client_id">r0hbhzJsmBCn_zdw91hi</string>
+    <string name="social_login_info_naver_client_secret">lkaAuU2Xsu</string>
+    <string name="social_login_info_naver_client_name">에어톡</string>
+
+    <string name="social_login_info_kakao_native_key">28b26f17f9c4267b6dc6ba94d8d84b83</string>
+    <string name="social_login_info_kakao_native_key_manifest"></string>
 </resources>

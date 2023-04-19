@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.databinding.ActivityMainBinding
+import com.yun.mysimpletalk.util.AuthUtil.snsSdkSetting
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -28,5 +29,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+
+        snsSdkSetting(this)
     }
 }

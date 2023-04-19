@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -10,7 +10,26 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <Button
+            android:id="@+id/btn_kakao"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="kakao"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btn_naver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="naver"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btn_kakao" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
