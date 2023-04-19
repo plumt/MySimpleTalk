@@ -9,9 +9,14 @@ import com.navercorp.nid.oauth.NidOAuthLogin
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
+import com.yun.mysimpletalk.common.constants.AuthConstants
 import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.KAKAO
 import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.NAVER
+import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
+import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
+import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
 import com.yun.mysimpletalk.databinding.FragmentLoginBinding
+import com.yun.mysimpletalk.ui.dialog.EdittextDialog
 import com.yun.mysimpletalk.util.AuthUtil.kakaoLogin
 import com.yun.mysimpletalk.util.AuthUtil.kakaoLoginCallBack
 import com.yun.mysimpletalk.util.AuthUtil.naverLogin
@@ -75,15 +80,39 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
 
     private fun fbLogin(userId: String, loginType: String) {
         viewModel.memberCheck(userId) {
-            if (it) {
-
-            } else {
-                when (loginType) {
-                    NAVER -> {} // 네이버 로그아웃
-                    KAKAO -> {} // 카카오 로그아웃
+            when (it) {
+                MEMBER -> {}
+                SIGNUP -> showNicknameInputDialog(userId)
+                ERROR -> {
+                    when (loginType) {
+                        NAVER -> {} // 네이버 로그아웃
+                        KAKAO -> {} // 카카오 로그아웃
+                    }
+                    serverError()
                 }
-                serverError()
             }
+        }
+    }
+
+    private fun showNicknameInputDialog(userId: String) {
+        EdittextDialog().run {
+            showDialog(requireActivity(), "닉네임", "사용하실 닉네임을 입력해 주세요")
+            setDialogListener(object : EdittextDialog.CustomDialogListener {
+                override fun onResult(result: String) {
+                    viewModel.nickNameCheck(userId, result) { nickNameCheckResult ->
+                        if (nickNameCheckResult) {
+                            dismissDialog()
+                            //TODO login to home
+                        } else {
+                            Toast.makeText(
+                                requireActivity(),
+                                "해당 닉네임은 사용하실 수 없습니다",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            })
         }
     }
 

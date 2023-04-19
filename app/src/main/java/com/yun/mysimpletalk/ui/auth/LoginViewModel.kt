@@ -2,9 +2,14 @@ package com.yun.mysimpletalk.ui.auth
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.yun.mysimpletalk.base.BaseViewModel
+import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
+import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
+import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
+import com.yun.mysimpletalk.ui.dialog.EdittextDialog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -19,45 +24,45 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    val fs = FirebaseFirestore.getInstance()
-    var pushToken = ""
+    private val fs = FirebaseFirestore.getInstance()
+    private var pushToken = ""
 
 
-    fun memberCheck(userId: String, callBack: (Boolean) -> Unit) {
+    fun memberCheck(userId: String, callBack: (String) -> Unit) {
         fs.collection("User")
             .document(userId)
             .get()
             .addOnSuccessListener { document ->
-                if(document.exists()){
+                if (document.exists()) {
                     document.data?.forEach { (key, value) ->
                         Log.d("lys", "data > $key $value")
                     }
-                } else {
-                    //TODO 닉네임을 먼저 입력 받고, 회원 가입 진행해야 함
-//                    fbSignUp(userId, callBack)
-                }
-            }.addOnFailureListener { e ->
-                Log.e("lys", "memberCheck fail > $e")
-                callBack(false)
-            }
+                    callBack(MEMBER)
+                } else callBack(SIGNUP)
+            }.addOnFailureListener { callBack(ERROR) }
     }
 
-    private fun fbSignUp(userId: String, callBack: (Boolean) -> Unit) {
+    private fun fbSignUp(userId: String, nickName: String, callBack: (Boolean) -> Unit) {
         fs.collection("User")
             .document(userId)
             .set(
                 mapOf(
-                    "name" to "testName",
+                    "name" to nickName,
                     "token" to pushToken
                 )
             )
-            .addOnSuccessListener {
-                Log.d("lys", "snsSignUp success")
-                callBack(true)
+            .addOnSuccessListener { callBack(true) }
+            .addOnFailureListener { callBack(false) }
+    }
+
+    fun nickNameCheck(userId: String, nickName: String, callBack: (Boolean) -> Unit) {
+        fs.collection("User")
+            .whereEqualTo("name", nickName)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) fbSignUp(userId, nickName, callBack)
+                else callBack(false)
             }
-            .addOnFailureListener { e ->
-                Log.e("lys", "snsSignUp fail > $e")
-                callBack(false)
-            }
+            .addOnFailureListener { callBack(false) }
     }
 }
