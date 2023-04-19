@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "173888110298",
+    "project_id": "simpletalk-bd526",
+    "storage_bucket": "simpletalk-bd526.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:173888110298:android:cf83741ee54216ed496fe3",
+        "android_client_info": {
+          "package_name": "com.yun.mysimpletalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "173888110298-21go5a8s79sk8q3cqp16vofkkutk753j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yun.mysimpletalk",
+            "certificate_hash": "6abee7ba4f5ea15aab87ee37bab544d5490ea0d8"
+          }
+        },
+        {
+          "client_id": "173888110298-88tqnepslutf2ph1qlqmus3245q8epoe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAInkf-XE0UqKdnsaiuzfnLcOngEh-BlK8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "173888110298-88tqnepslutf2ph1qlqmus3245q8epoe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

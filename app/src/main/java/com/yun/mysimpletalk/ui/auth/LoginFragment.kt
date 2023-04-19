@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import com.kakao.sdk.user.UserApiClient
 import com.navercorp.nid.oauth.NidOAuthLogin
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
@@ -47,30 +46,44 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
 
     private fun snsLogin(loginType: String) {
         // TODO 인터넷 연결 오류 체크 기능 추가 요함
+
+        val callback: (String) -> Unit = { userId ->
+            fbLogin(userId, loginType)
+        }
         when (loginType) {
             NAVER -> {
                 naverLogin(requireActivity()) { success ->
-                    if (success) {
-                        NidOAuthLogin().callProfileApi(naverLoginCallBack { user ->
-                            if (user != null) {
-                                Log.d("lys", "naver login success > ${user.profile!!.id}")
-                            } else serverError()
-                        })
-                    } else serverError()
+                    if (success) NidOAuthLogin().callProfileApi(naverLoginCallBack { user ->
+                        if (user != null) callback(user.profile!!.id!!)
+                        else serverError()
+                    })
+                    else serverError()
                 }
             }
             KAKAO -> {
                 kakaoLogin(requireActivity()) { success ->
-                    if (success) {
-                        kakaoLoginCallBack { user ->
-                            if (user != null) {
-                                Log.d("lys", "kakao login success > ${user.id}")
-                            } else serverError()
-                        }
-                    } else serverError()
+                    if (success) kakaoLoginCallBack { user ->
+                        if (user != null) callback(user.id.toString())
+                        else serverError()
+                    }
+                    else serverError()
                 }
             }
             else -> serverError()
+        }
+    }
+
+    private fun fbLogin(userId: String, loginType: String) {
+        viewModel.memberCheck(userId) {
+            if (it) {
+
+            } else {
+                when (loginType) {
+                    NAVER -> {} // 네이버 로그아웃
+                    KAKAO -> {} // 카카오 로그아웃
+                }
+                serverError()
+            }
         }
     }
 
