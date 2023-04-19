@@ -60,7 +60,13 @@
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.yun.mysimpletalk.ui.setting.SettingFragment"
-        android:label="SettingFragment" />
+        android:label="SettingFragment">
+        <action
+            android:id="@+id/action_settingFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/mobile_navigation"
+            app:popUpToInclusive="true" />
+    </fragment>
 
 
 </navigation>

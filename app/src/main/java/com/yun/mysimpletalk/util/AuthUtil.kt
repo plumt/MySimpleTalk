@@ -8,10 +8,13 @@ import com.kakao.sdk.common.model.ClientErrorCause
 import com.kakao.sdk.user.UserApiClient
 import com.kakao.sdk.user.model.User
 import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.NidOAuthLogin
 import com.navercorp.nid.oauth.OAuthLoginCallback
 import com.navercorp.nid.profile.NidProfileCallback
 import com.navercorp.nid.profile.data.NidProfileResponse
 import com.yun.mysimpletalk.R
+import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.KAKAO
+import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.NAVER
 
 object AuthUtil {
 
@@ -104,6 +107,65 @@ object AuthUtil {
     fun kakaoLoginCallBack(callBack: (User?) -> Unit) {
         UserApiClient.instance.me { user, error ->
             callBack(user)
+        }
+    }
+
+    fun snsLogout(type: String, callBack: (Boolean) -> Unit){
+        when(type){
+            KAKAO -> {
+                UserApiClient.instance.logout { error ->
+                    if(error != null){
+                        Log.e("lys","kakao logout error > ${error.message}")
+                        callBack(false)
+                    } else {
+                        Log.d("lys","kakao logout success")
+                        callBack(true)
+                    }
+                }
+            }
+            NAVER -> {
+                NaverIdLoginSDK.logout()
+                callBack(true)
+            }
+            else -> callBack(false)
+        }
+    }
+
+    fun snsSignout(context: Context,type: String, callBack: (Boolean) -> Unit){
+        when(type){
+            KAKAO -> {
+                UserApiClient.instance.unlink { error ->
+                    if (error != null) {
+                        Log.e("lys", "kakao unlink error > $error")
+                        callBack(false)
+                    } else {
+                        Log.d("lys", "kakao unlink success")
+                        callBack(true)
+                    }
+                }
+            }
+            NAVER -> {
+                NidOAuthLogin().callDeleteTokenApi(context, object : OAuthLoginCallback {
+                    override fun onSuccess() {
+                        Log.d("lys", "naver delete oath success")
+                        callBack(true)
+                    }
+
+                    override fun onError(errorCode: Int, message: String) {
+                        Log.e("lys", "naver delete oath onError > errorCode:${errorCode} message:$message")
+                        callBack(false)
+                    }
+
+                    override fun onFailure(httpStatus: Int, message: String) {
+                        Log.e(
+                            "lys",
+                            "naver delete oath onFailure > httpStatus:${httpStatus} message:$message"
+                        )
+                        callBack(false)
+                    }
+                })
+            }
+            else -> callBack(false)
         }
     }
 }

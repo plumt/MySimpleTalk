@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
+import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
@@ -32,15 +33,26 @@ class LoginViewModel @Inject constructor(
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    val info = UserModel.Info(
-                        userId,
-                        document.getString("token")!!,
-                        document.getString("name")!!,
-                        document.getString("type")!!
-                    )
-                    _userInfo.value = info
-                    sPrefs.setString(mContext, "login", type)
-                    callBack(MEMBER)
+                    FirebaseMessaging.getInstance().token.addOnCompleteListener { t ->
+                        fs.collection("User")
+                            .document(userId)
+                            .update("token", t.result)
+                            .addOnCompleteListener {
+                                val info = UserModel.Info(
+                                    userId,
+                                    t.result,
+                                    document.getString("name")!!,
+                                    document.getString("type")!!
+                                )
+                                _userInfo.value = info
+                                sPrefs.setString(mContext, "login", type)
+                                callBack(MEMBER)
+                            }
+                            .addOnFailureListener {
+                                callBack(ERROR)
+                            }
+                    }.addOnFailureListener { callBack(ERROR) }
+
                 } else callBack(SIGNUP)
             }.addOnFailureListener { callBack(ERROR) }
     }
