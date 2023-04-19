@@ -1,7 +1,6 @@
 package com.yun.mysimpletalk.ui.auth
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
@@ -9,7 +8,6 @@ import com.navercorp.nid.oauth.NidOAuthLogin
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
-import com.yun.mysimpletalk.common.constants.AuthConstants
 import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.KAKAO
 import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.NAVER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
@@ -79,10 +77,10 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
     }
 
     private fun fbLogin(userId: String, loginType: String) {
-        viewModel.memberCheck(userId) {
+        viewModel.memberCheck(userId, loginType) {
             when (it) {
                 MEMBER -> navigate(R.id.action_loginFragment_to_homeFragment)
-                SIGNUP -> showNicknameInputDialog(userId)
+                SIGNUP -> showNicknameInputDialog(userId, loginType)
                 ERROR -> {
                     when (loginType) {
                         NAVER -> {} // 네이버 로그아웃
@@ -94,12 +92,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
         }
     }
 
-    private fun showNicknameInputDialog(userId: String) {
+    private fun showNicknameInputDialog(userId: String, loginType: String) {
         EdittextDialog().run {
             showDialog(requireActivity(), "닉네임", "사용하실 닉네임을 입력해 주세요")
             setDialogListener(object : EdittextDialog.CustomDialogListener {
                 override fun onResult(result: String) {
-                    viewModel.nickNameCheck(userId, result) { nickNameCheckResult ->
+                    viewModel.nickNameCheck(userId, result, loginType) { nickNameCheckResult ->
                         if (nickNameCheckResult) {
                             dismissDialog()
                             navigate(R.id.action_loginFragment_to_homeFragment)
