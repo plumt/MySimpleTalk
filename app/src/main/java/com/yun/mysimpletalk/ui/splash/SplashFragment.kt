@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.fragment.app.viewModels
+import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.oauth.NidOAuthLogin
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
@@ -12,9 +13,8 @@ import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.KAKAO
 import com.yun.mysimpletalk.common.constants.AuthConstants.LoginType.NAVER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.databinding.FragmentSplashBinding
-import com.yun.mysimpletalk.util.AuthUtil
-import com.yun.mysimpletalk.util.AuthUtil.kakaoLogin
-import com.yun.mysimpletalk.util.AuthUtil.naverLogin
+import com.yun.mysimpletalk.util.AuthUtil.kakaoLoginCallBack
+import com.yun.mysimpletalk.util.AuthUtil.naverLoginCallBack
 import com.yun.mysimpletalk.util.PreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -43,6 +43,10 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>() {
             }
         }, 1000)
 
+        viewModel.userInfo.observe(viewLifecycleOwner) {
+            if (it != null) sharedViewModel.setUserInfo(it)
+        }
+
     }
 
     private fun moveScreen(isLogin: Boolean) {
@@ -57,20 +61,16 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>() {
         }
         when (loginType) {
             NAVER -> {
-                naverLogin(requireActivity()) { success ->
-                    if (success) NidOAuthLogin().callProfileApi(AuthUtil.naverLoginCallBack { user ->
+                NaverIdLoginSDK.getAccessToken()?.run {
+                    NidOAuthLogin().callProfileApi(naverLoginCallBack { user ->
                         if (user != null) callback(user.profile!!.id!!)
                         else moveScreen(false)
                     })
-                    else moveScreen(false)
-                }
+                } ?: moveScreen(false)
             }
             KAKAO -> {
-                kakaoLogin(requireActivity()) { success ->
-                    if (success) AuthUtil.kakaoLoginCallBack { user ->
-                        if (user != null) callback(user.id.toString())
-                        else moveScreen(false)
-                    }
+                kakaoLoginCallBack { user ->
+                    if (user != null) callback(user.id.toString())
                     else moveScreen(false)
                 }
             }

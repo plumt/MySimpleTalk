@@ -45,6 +45,10 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                 snsLogin(KAKAO)
             }
         }
+
+        viewModel.userInfo.observe(viewLifecycleOwner) {
+            if (it != null) sharedViewModel.setUserInfo(it)
+        }
     }
 
     private fun snsLogin(loginType: String) {

@@ -1,6 +1,7 @@
 package com.yun.mysimpletalk.ui.home
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import com.yun.mysimpletalk.R
@@ -21,5 +22,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        sharedViewModel.userInfo.observe(viewLifecycleOwner){
+            Log.d("lys","userInfo > $it")
+        }
     }
 }
