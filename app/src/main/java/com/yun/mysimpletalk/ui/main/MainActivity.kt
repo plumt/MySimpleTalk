@@ -32,10 +32,10 @@ class MainActivity : AppCompatActivity() {
                 setOnItemSelectedListener { menuItem ->
                     Log.d("lys", "menuItem.title > ${menuItem.title}")
                     when (menuItem.title) {
-                        "홈" -> {}
-                        "채팅" -> {}
+                        "홈" -> navController.navigate(R.id.action_global_homeFragment)
+                        "채팅" -> navController.navigate(R.id.action_global_chatFragment)
                         "일정" -> {}
-                        "설정" -> {}
+                        "설정" -> navController.navigate(R.id.action_global_settingFragment)
                     }
                     true
                 }

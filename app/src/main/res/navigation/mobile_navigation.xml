@@ -4,6 +4,26 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@id/splashFragment">
 
+
+    <action
+        android:id="@+id/action_global_homeFragment"
+        app:destination="@+id/homeFragment"
+        app:popUpTo="@id/mobile_navigation"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_chatFragment"
+        app:destination="@+id/chatFragment"
+        app:popUpTo="@id/mobile_navigation"
+        app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_settingFragment"
+        app:destination="@+id/settingFragment"
+        app:popUpTo="@id/mobile_navigation"
+        app:popUpToInclusive="true" />
+
+
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.yun.mysimpletalk.ui.auth.LoginFragment"
@@ -33,6 +53,14 @@
             app:popUpTo="@id/mobile_navigation"
             app:popUpToInclusive="true" />
     </fragment>
+    <fragment
+        android:id="@+id/chatFragment"
+        android:name="com.yun.mysimpletalk.ui.chat.ChatFragment"
+        android:label="ChatFragment" />
+    <fragment
+        android:id="@+id/settingFragment"
+        android:name="com.yun.mysimpletalk.ui.setting.SettingFragment"
+        android:label="SettingFragment" />
 
 
 </navigation>
