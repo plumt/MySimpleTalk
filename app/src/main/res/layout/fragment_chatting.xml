@@ -4,19 +4,13 @@
     <data>
 
         <variable
-            name="chat"
-            type="com.yun.mysimpletalk.ui.chat.ChatViewModel" />
+            name="chatting"
+            type="com.yun.mysimpletalk.ui.chat.chatting.ChattingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="chat"
-            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
