@@ -4,9 +4,18 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@id/loginFragment">
 
-
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.yun.mysimpletalk.ui.auth.LoginFragment"
-        android:label="LoginFragment" />
+        android:label="LoginFragment" >
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.yun.mysimpletalk.ui.home.HomeFragment"
+        android:label="HomeFragment" />
+
+
 </navigation>

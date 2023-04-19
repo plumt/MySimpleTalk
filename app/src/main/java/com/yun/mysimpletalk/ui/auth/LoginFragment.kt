@@ -81,7 +81,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
     private fun fbLogin(userId: String, loginType: String) {
         viewModel.memberCheck(userId) {
             when (it) {
-                MEMBER -> {}
+                MEMBER -> navigate(R.id.action_loginFragment_to_homeFragment)
                 SIGNUP -> showNicknameInputDialog(userId)
                 ERROR -> {
                     when (loginType) {
@@ -102,6 +102,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
                     viewModel.nickNameCheck(userId, result) { nickNameCheckResult ->
                         if (nickNameCheckResult) {
                             dismissDialog()
+                            navigate(R.id.action_loginFragment_to_homeFragment)
                             //TODO login to home
                         } else {
                             Toast.makeText(
