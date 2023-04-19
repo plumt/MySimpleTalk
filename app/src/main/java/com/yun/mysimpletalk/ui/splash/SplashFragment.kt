@@ -47,6 +47,10 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>() {
             if (it != null) sharedViewModel.setUserInfo(it)
         }
 
+        sharedViewModel.let { sv ->
+            sv.hideBottomNav()
+        }
+
     }
 
     private fun moveScreen(isLogin: Boolean) {

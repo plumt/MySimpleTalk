@@ -2,6 +2,7 @@ package com.yun.mysimpletalk.ui.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
@@ -26,6 +27,19 @@ class MainActivity : AppCompatActivity() {
         binding.run {
             lifecycleOwner = this@MainActivity
             main = mainViewModel
+
+            bottomNavView.run {
+                setOnItemSelectedListener { menuItem ->
+                    Log.d("lys", "menuItem.title > ${menuItem.title}")
+                    when (menuItem.title) {
+                        "홈" -> {}
+                        "채팅" -> {}
+                        "일정" -> {}
+                        "설정" -> {}
+                    }
+                    true
+                }
+            }
         }
 
         navController = Navigation.findNavController(this, R.id.nav_host_fragment)

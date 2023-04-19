@@ -49,6 +49,10 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
         viewModel.userInfo.observe(viewLifecycleOwner) {
             if (it != null) sharedViewModel.setUserInfo(it)
         }
+
+        sharedViewModel.let { sv ->
+            sv.hideBottomNav()
+        }
     }
 
     private fun snsLogin(loginType: String) {

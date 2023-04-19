@@ -23,8 +23,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedViewModel.userInfo.observe(viewLifecycleOwner){
-            Log.d("lys","userInfo > $it")
+        sharedViewModel.let {  sv ->
+            sv.userInfo.observe(viewLifecycleOwner){
+                Log.d("lys","userInfo > $it")
+            }
+
+            sv.showBottomNav()
         }
+
     }
 }
