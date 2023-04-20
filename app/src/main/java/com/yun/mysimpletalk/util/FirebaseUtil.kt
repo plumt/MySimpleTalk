@@ -1,8 +1,14 @@
 package com.yun.mysimpletalk.util
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
+import com.yun.mysimpletalk.common.constants.FirebaseConstants
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.ERROR
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.EXISTS
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.NOT_EXISTS
 
 object FirebaseUtil {
 
@@ -34,6 +40,45 @@ object FirebaseUtil {
             .collection(USER)
             .document(userId)
             .delete().addOnCompleteListener { callBack(it.isSuccessful) }
+    }
+
+    /**
+     * 닉네임 체크
+     */
+    fun nickNameCheck(nickName: String, callBack: (String?) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USER)
+            .whereEqualTo("name", nickName)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) callBack("")
+                else callBack(documents.documents[0].id)
+            }
+            .addOnFailureListener { callBack(null) }
+    }
+
+    /**
+     * 닉네임 배열 체크
+     */
+    fun nickNameCheck(userId: String, userId2: String, callBack: (String) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USER)
+            .document(userId)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                val arrayField = documentSnapshot.get("wait") as? ArrayList<String>
+                if (arrayField?.contains(userId2) == true) callBack(EXISTS)
+                else callBack(NOT_EXISTS)
+            }
+            .addOnFailureListener { callBack(ERROR) }
+    }
+
+    fun selectChatList(userId: String, callBack: (QuerySnapshot?) -> Unit) {
+        FirebaseFirestore.getInstance().collection("chat")
+            .whereArrayContains("members", userId)
+            .get()
+            .addOnSuccessListener {
+                callBack(it)
+            }
+            .addOnFailureListener { callBack(null) }
     }
 
 

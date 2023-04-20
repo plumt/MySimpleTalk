@@ -37,7 +37,11 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.yun.mysimpletalk.ui.home.HomeFragment"
-        android:label="HomeFragment" />
+        android:label="HomeFragment" >
+        <action
+            android:id="@+id/action_homeFragment_to_waitFragment"
+            app:destination="@id/waitFragment" />
+    </fragment>
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.yun.mysimpletalk.ui.splash.SplashFragment"
@@ -67,6 +71,10 @@
             app:popUpTo="@id/mobile_navigation"
             app:popUpToInclusive="true" />
     </fragment>
+    <fragment
+        android:id="@+id/waitFragment"
+        android:name="com.yun.mysimpletalk.ui.wait.WaitFragment"
+        android:label="WaitFragment" />
 
 
 </navigation>

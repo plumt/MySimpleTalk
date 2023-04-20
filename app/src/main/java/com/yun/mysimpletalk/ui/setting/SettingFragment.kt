@@ -35,8 +35,6 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
     @Inject
     lateinit var sPrefs: PreferenceUtil
 
-    private val fs = FirebaseFirestore.getInstance()
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

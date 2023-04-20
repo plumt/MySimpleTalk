@@ -19,6 +19,7 @@ import com.yun.mysimpletalk.util.AuthUtil.kakaoLogin
 import com.yun.mysimpletalk.util.AuthUtil.kakaoLoginCallBack
 import com.yun.mysimpletalk.util.AuthUtil.naverLogin
 import com.yun.mysimpletalk.util.AuthUtil.naverLoginCallBack
+import com.yun.mysimpletalk.util.FirebaseUtil.nickNameCheck
 import com.yun.mysimpletalk.util.Util.keyHash
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -105,17 +106,21 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
             showDialog(requireActivity(), "닉네임", "사용하실 닉네임을 입력해 주세요")
             setDialogListener(object : EdittextDialog.CustomDialogListener {
                 override fun onResult(result: String) {
-                    viewModel.nickNameCheck(userId, result, loginType) { nickNameCheckResult ->
-                        if (nickNameCheckResult) {
-                            dismissDialog()
-                            navigate(R.id.action_loginFragment_to_homeFragment)
-                            //TODO login to home
-                        } else {
-                            Toast.makeText(
-                                requireActivity(),
-                                "해당 닉네임은 사용하실 수 없습니다",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    nickNameCheck(result) { id ->
+                        if(id == ""){
+                            viewModel.fbSignUp(userId,result,loginType){ success ->
+                                if (success) {
+                                    dismissDialog()
+                                    navigate(R.id.action_loginFragment_to_homeFragment)
+                                    //TODO login to home
+                                } else {
+                                    Toast.makeText(
+                                        requireActivity(),
+                                        "해당 닉네임은 사용하실 수 없습니다",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
                         }
                     }
                 }

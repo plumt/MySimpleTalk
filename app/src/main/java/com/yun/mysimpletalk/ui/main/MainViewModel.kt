@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.yun.mysimpletalk.base.BaseViewModel
-import com.yun.mysimpletalk.data.UserModel
+import com.yun.mysimpletalk.data.model.UserModel
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(application: Application) : BaseViewModel(application) {

@@ -7,6 +7,7 @@ import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.base.BaseFragment
 import com.yun.mysimpletalk.databinding.FragmentChatListBinding
+import com.yun.mysimpletalk.util.FirebaseUtil.selectChatList
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,5 +22,9 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        selectChatList(""){
+
+        }
     }
 }

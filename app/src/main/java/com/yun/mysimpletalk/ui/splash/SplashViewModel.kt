@@ -9,7 +9,7 @@ import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
-import com.yun.mysimpletalk.data.UserModel
+import com.yun.mysimpletalk.data.model.UserModel
 import com.yun.mysimpletalk.util.FirebaseUtil.getToken
 import com.yun.mysimpletalk.util.FirebaseUtil.updateToken
 import com.yun.mysimpletalk.util.PreferenceUtil
@@ -22,13 +22,11 @@ class SplashViewModel @Inject constructor(
     private val sPrefs: PreferenceUtil
 ) : BaseViewModel(application) {
 
-    private val fs = FirebaseFirestore.getInstance()
-
     private val _userInfo = MutableLiveData<UserModel.Info>()
     val userInfo: LiveData<UserModel.Info> get() = _userInfo
 
     fun memberCheck(userId: String, callBack: (String) -> Unit) {
-        fs.collection(USER)
+        FirebaseFirestore.getInstance().collection(USER)
             .document(userId)
             .get()
             .addOnSuccessListener { document ->

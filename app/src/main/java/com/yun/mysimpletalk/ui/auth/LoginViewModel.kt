@@ -9,7 +9,7 @@ import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
-import com.yun.mysimpletalk.data.UserModel
+import com.yun.mysimpletalk.data.model.UserModel
 import com.yun.mysimpletalk.util.FirebaseUtil.getToken
 import com.yun.mysimpletalk.util.FirebaseUtil.updateToken
 import com.yun.mysimpletalk.util.PreferenceUtil
@@ -25,10 +25,8 @@ class LoginViewModel @Inject constructor(
     private val _userInfo = MutableLiveData<UserModel.Info>()
     val userInfo: LiveData<UserModel.Info> get() = _userInfo
 
-    private val fs = FirebaseFirestore.getInstance()
-
     fun memberCheck(userId: String, type: String, callBack: (String) -> Unit) {
-        fs.collection(USER)
+        FirebaseFirestore.getInstance().collection(USER)
             .document(userId)
             .get()
             .addOnSuccessListener { document ->
@@ -45,14 +43,14 @@ class LoginViewModel @Inject constructor(
             }.addOnFailureListener { callBack(ERROR) }
     }
 
-    private fun fbSignUp(
+    fun fbSignUp(
         userId: String,
         nickName: String,
         type: String,
         callBack: (Boolean) -> Unit
     ) {
         getToken { token ->
-            fs.collection(USER)
+            FirebaseFirestore.getInstance().collection(USER)
                 .document(userId)
                 .set(signupParams(nickName, token, type))
                 .addOnSuccessListener {
@@ -60,17 +58,6 @@ class LoginViewModel @Inject constructor(
                     callBack(true)
                 }.addOnFailureListener { callBack(false) }
         }
-    }
-
-    fun nickNameCheck(userId: String, nickName: String, type: String, callBack: (Boolean) -> Unit) {
-        fs.collection(USER)
-            .whereEqualTo("name", nickName)
-            .get()
-            .addOnSuccessListener { documents ->
-                if (documents.isEmpty) fbSignUp(userId, nickName, type, callBack)
-                else callBack(false)
-            }
-            .addOnFailureListener { callBack(false) }
     }
 
     private fun setUserInfo(userId: String, token: String, nickName: String, type: String) {
