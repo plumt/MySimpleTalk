@@ -8,7 +8,9 @@ class UserModel {
         val pushToken: String,
         val nickName: String,
         val loginType: String,
-        val friends: ArrayList<String>
+        val friends: ArrayList<String>,
+        val block: ArrayList<String>,
+        val wait: ArrayList<String>
     )
 
     data class User(

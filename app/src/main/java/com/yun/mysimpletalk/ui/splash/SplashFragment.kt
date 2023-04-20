@@ -44,10 +44,10 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>() {
         }, 1000)
 
         viewModel.userInfo.observe(viewLifecycleOwner) {
-            if (it != null) sharedViewModel.setUserInfo(it)
+            if (it != null) sVM.setUserInfo(it)
         }
 
-        sharedViewModel.let { sv ->
+        sVM.let { sv ->
             sv.hideBottomNav()
         }
 

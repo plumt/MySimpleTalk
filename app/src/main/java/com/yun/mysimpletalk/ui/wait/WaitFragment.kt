@@ -22,15 +22,15 @@ class WaitFragment : BaseFragment<FragmentWaitBinding, WaitViewModel>() {
     override fun isOnBackEvent(): Boolean = true
     override fun onBackEvent() {
         findNavController().popBackStack()
-        sharedViewModel.showBottomNav()
+        sVM.showBottomNav()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.checkWaitCount(sharedViewModel.userInfo.value!!)
+        viewModel.checkWaitCount(sVM.userInfo.value!!)
 
-        binding.let { v->
+        binding.let { v ->
             v.rvWait.apply {
                 adapter = object : BaseRecyclerAdapter.Create<UserModel.User, ItemWaitBinding>(
                     R.layout.item_wait,
@@ -38,12 +38,31 @@ class WaitFragment : BaseFragment<FragmentWaitBinding, WaitViewModel>() {
                     BR.waitListener
                 ) {
                     override fun onItemClick(item: UserModel.User, view: View) {
-                        when(view.tag){
+                        when (view.tag) {
                             "block" -> {
-                                Toast.makeText(requireContext(),"차단",Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "차단", Toast.LENGTH_SHORT).show()
+                                viewModel.blockUser(
+                                    sVM.userInfo.value!!.userId,
+                                    item
+                                ) { success ->
+                                    if (success) {
+                                        sVM.userInfo.value!!.wait.remove(item.userId)
+                                        sVM.userInfo.value!!.block.add(item.userId)
+                                    }
+
+                                }
                             }
                             "accept" -> {
-                                Toast.makeText(requireContext(),"추가",Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "추가", Toast.LENGTH_SHORT).show()
+                                viewModel.acceptUser(
+                                    sVM.userInfo.value!!.userId,
+                                    item
+                                ) { success ->
+                                    if (success) {
+                                        sVM.userInfo.value!!.wait.remove(item.userId)
+                                        sVM.userInfo.value!!.friends.add(item.userId)
+                                    }
+                                }
                             }
                         }
                     }

@@ -3,10 +3,12 @@ package com.yun.mysimpletalk.ui.wait
 import android.app.Application
 import android.util.Log
 import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.base.ListLiveData
 import com.yun.mysimpletalk.common.constants.FirebaseConstants
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
 import com.yun.mysimpletalk.data.model.UserModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -50,5 +52,60 @@ class WaitViewModel @Inject constructor(
             .addOnFailureListener {
                 it.printStackTrace()
             }
+    }
+
+    private fun removeWaitUser(flag: String,myId: String, userId: String, callBack: (Boolean) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USER)
+            .document(myId)
+            .update("wait",FieldValue.arrayRemove(userId))
+            .addOnSuccessListener {
+                when(flag){
+                    "block" -> addBlockUser(myId, userId, callBack)
+                    "accept" -> addFriendUser(myId, userId, callBack)
+                    else -> callBack(false)
+                }
+
+            }
+            .addOnFailureListener { callBack(false) }
+    }
+
+    private fun addBlockUser(myId: String, userId: String, callBack: (Boolean) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USER)
+            .document(myId)
+            .update("block", FieldValue.arrayUnion(userId))
+            .addOnCompleteListener {
+                Log.d("lys", "add block > ${it.isSuccessful}")
+                callBack(it.isSuccessful)
+            }
+    }
+
+    private fun addFriendUser(myId: String, userId: String, callBack: (Boolean) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USER)
+            .document(myId)
+            .update("friend", FieldValue.arrayUnion(userId))
+            .addOnCompleteListener {
+                Log.d("lys", "add friend > ${it.isSuccessful}")
+                callBack(it.isSuccessful)
+            }
+    }
+
+    fun blockUser(myId: String, item: UserModel.User, callBack: (Boolean) -> Unit) {
+        removeWaitUser("block",myId, item.userId) { success ->
+            if (success) {
+                waitUsers.remove(item)
+                callBack(true)
+            }
+            else callBack(false)
+        }
+    }
+
+    fun acceptUser(myId: String, item: UserModel.User, callBack: (Boolean) -> Unit) {
+        removeWaitUser("accept",myId, item.userId) { success ->
+            if (success) {
+                waitUsers.remove(item)
+                callBack(true)
+            }
+            else callBack(false)
+        }
     }
 }

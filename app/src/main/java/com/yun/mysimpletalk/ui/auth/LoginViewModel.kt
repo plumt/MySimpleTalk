@@ -37,7 +37,11 @@ class LoginViewModel @Inject constructor(
                                 val name = document.getString("name")!!
                                 val friends =
                                     document.get("friend") as? ArrayList<String> ?: arrayListOf()
-                                setUserInfo(userId, token,name , type, friends)
+                                val block =
+                                    document.get("block") as? ArrayList<String> ?: arrayListOf()
+                                val wait =
+                                    document.get("wait") as? ArrayList<String> ?: arrayListOf()
+                                setUserInfo(userId, token, name, type, friends, block, wait)
                                 callBack(MEMBER)
                             } else callBack(ERROR)
                         }
@@ -57,7 +61,10 @@ class LoginViewModel @Inject constructor(
                 .document(userId)
                 .set(signupParams(nickName, token, type))
                 .addOnSuccessListener {
-                    setUserInfo(userId, token, nickName, type, arrayListOf())
+                    setUserInfo(
+                        userId, token, nickName, type, arrayListOf(), arrayListOf(),
+                        arrayListOf()
+                    )
                     callBack(true)
                 }.addOnFailureListener { callBack(false) }
         }
@@ -68,9 +75,11 @@ class LoginViewModel @Inject constructor(
         token: String,
         nickName: String,
         type: String,
-        friend: ArrayList<String>
+        friend: ArrayList<String>,
+        block: ArrayList<String>,
+        wait: ArrayList<String>
     ) {
-        _userInfo.value = UserModel.Info(userId, token, nickName, type, friend)
+        _userInfo.value = UserModel.Info(userId, token, nickName, type, friend, block, wait)
         sPrefs.setString(mContext, "login", type)
     }
 

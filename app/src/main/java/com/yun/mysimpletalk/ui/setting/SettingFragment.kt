@@ -4,14 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.LOGOUT
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNOUT
-import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
 import com.yun.mysimpletalk.databinding.FragmentSettingBinding
 import com.yun.mysimpletalk.ui.main.MainActivity
 import com.yun.mysimpletalk.util.AuthUtil.snsLogout
@@ -87,7 +85,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
                 SIGNOUT -> {
                     //TODO 친구 리스트에서 해당 사용자 제거
                     //TODO 채팅 리스트에서 해당 사용자 제거
-                    deleteUser(sharedViewModel.userInfo.value!!.userId) { success ->
+                    deleteUser(sVM.userInfo.value!!.userId) { success ->
                         if (success) moveLoginScreen()
                         else {
                             Log.e("lys","회원탈퇴 실패")
@@ -95,7 +93,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
                     }
                 }
                 LOGOUT -> {
-                    updateToken(sharedViewModel.userInfo.value!!.userId, "") { success ->
+                    updateToken(sVM.userInfo.value!!.userId, "") { success ->
                         if (success) moveLoginScreen()
                         else {
                             Log.e("lys","로그아웃 실패")
@@ -110,7 +108,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
 
 
     private fun moveLoginScreen() {
-        sharedViewModel.setUserInfo(null)
+        sVM.setUserInfo(null)
         navigate(R.id.action_settingFragment_to_loginFragment)
         (requireActivity() as MainActivity).binding.bottomNavView.selectedItemId = R.id.home
     }

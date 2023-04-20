@@ -31,7 +31,7 @@ abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {
 
     abstract fun isOnBackEvent(): Boolean
 
-    val sharedViewModel: MainViewModel by activityViewModels()
+    val sVM: MainViewModel by activityViewModels()
 
     fun navigate(resId: Int, bundle: Bundle? = null, options: NavOptions? = null) {
         try {
@@ -54,7 +54,7 @@ abstract class BaseFragment<B : ViewDataBinding, M : ViewModel> : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.setVariable(setVariable(), viewModel)
-        binding.setVariable(BR.main, sharedViewModel)
+        binding.setVariable(BR.main, sVM)
 
         if (isOnBackEvent()) {
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {

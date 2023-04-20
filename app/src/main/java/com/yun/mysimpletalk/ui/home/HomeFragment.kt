@@ -1,22 +1,14 @@
 package com.yun.mysimpletalk.ui.home
 
 import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Nickname
 import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import com.google.firebase.FirebaseOptions
-import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.model.mutation.FieldMask
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.base.BaseFragment
 import com.yun.mysimpletalk.base.BaseRecyclerAdapter
-import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
 import com.yun.mysimpletalk.data.model.UserModel
 import com.yun.mysimpletalk.databinding.FragmentHomeBinding
 import com.yun.mysimpletalk.databinding.ItemHomeBinding
@@ -37,7 +29,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedViewModel.let { sv ->
+        sVM.let { sv ->
 
             sv.showBottomNav()
 
@@ -73,7 +65,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
                 searchFriend()
             }
             v.btnCheckWait.setOnClickListener {
-                sharedViewModel.hideBottomNav()
+                sVM.hideBottomNav()
                 navigate(R.id.action_homeFragment_to_waitFragment)
             }
         }
@@ -103,12 +95,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     }
 
     private fun addFriend(friendId: String) {
-        if (friendId == sharedViewModel.userInfo.value!!.userId) {
+        //TODO block에 들어가 있거나, wait에 들어가 있거나 friend에 들어가 있으면 추가 X
+        if (friendId == sVM.userInfo.value!!.userId) {
             Toast.makeText(requireActivity(), "본인", Toast.LENGTH_SHORT).show()
         }
         viewModel.addFriend(
             friendId,
-            sharedViewModel.userInfo.value!!.userId
+            sVM.userInfo.value!!.userId
         ) { success ->
             if (success) Toast.makeText(requireActivity(), "친추 성공", Toast.LENGTH_SHORT).show()
         }

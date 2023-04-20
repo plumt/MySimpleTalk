@@ -61,6 +61,7 @@ class HomeViewModel @Inject constructor(
             .whereIn(FieldPath.documentId(), documents)
             .get()
             .addOnSuccessListener {
+                friendUsers.clear(true)
                 it.forEachIndexed { index, snap ->
                     friendUsers.add(UserModel.User(index, snap.id, snap.getString("name")!!))
                 }
