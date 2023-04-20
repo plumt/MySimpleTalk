@@ -8,6 +8,7 @@ import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
 import com.yun.mysimpletalk.data.UserModel
 import com.yun.mysimpletalk.util.FirebaseUtil.getToken
 import com.yun.mysimpletalk.util.FirebaseUtil.updateToken
@@ -27,7 +28,7 @@ class LoginViewModel @Inject constructor(
     private val fs = FirebaseFirestore.getInstance()
 
     fun memberCheck(userId: String, type: String, callBack: (String) -> Unit) {
-        fs.collection("User")
+        fs.collection(USER)
             .document(userId)
             .get()
             .addOnSuccessListener { document ->
@@ -51,7 +52,7 @@ class LoginViewModel @Inject constructor(
         callBack: (Boolean) -> Unit
     ) {
         getToken { token ->
-            fs.collection("User")
+            fs.collection(USER)
                 .document(userId)
                 .set(signupParams(nickName, token, type))
                 .addOnSuccessListener {
@@ -62,7 +63,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun nickNameCheck(userId: String, nickName: String, type: String, callBack: (Boolean) -> Unit) {
-        fs.collection("User")
+        fs.collection(USER)
             .whereEqualTo("name", nickName)
             .get()
             .addOnSuccessListener { documents ->

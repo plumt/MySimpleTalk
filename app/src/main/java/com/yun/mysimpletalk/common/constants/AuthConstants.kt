@@ -8,8 +8,11 @@ class AuthConstants {
     }
 
     object UserState {
-        const val MEMBER = "10001"
-        const val SIGNUP = "10002"
-        const val ERROR = "10003"
+        const val ERROR = "10001"
+        const val MEMBER = "10002"
+        const val SIGNUP = "10003"
+        const val SIGNOUT = "10004"
+        const val LOGOUT = "10005"
     }
+
 }
