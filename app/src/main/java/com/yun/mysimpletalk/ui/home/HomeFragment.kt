@@ -45,6 +45,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
             }
         }
 
+        viewModel.let { v ->
+            v.friendUsers.observe(viewLifecycleOwner){
+                if(it != null) sVM.friendUsers.value = it
+            }
+        }
+
         binding.let { v ->
 
             v.rvHome.apply {

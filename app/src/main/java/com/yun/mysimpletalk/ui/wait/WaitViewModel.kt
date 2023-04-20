@@ -7,8 +7,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.base.ListLiveData
-import com.yun.mysimpletalk.common.constants.FirebaseConstants
-import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USERS
 import com.yun.mysimpletalk.data.model.UserModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -24,7 +23,7 @@ class WaitViewModel @Inject constructor(
     val waitUsers = ListLiveData<UserModel.User>()
 
     fun checkWaitCount(userInfo: UserModel.Info) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .document(userInfo.userId)
             .get()
             .addOnSuccessListener {
@@ -41,7 +40,7 @@ class WaitViewModel @Inject constructor(
     }
 
     private fun selectFriend(documents: ArrayList<String>) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .whereIn(FieldPath.documentId(), documents)
             .get()
             .addOnSuccessListener {
@@ -67,7 +66,7 @@ class WaitViewModel @Inject constructor(
         userId: String,
         callBack: (Boolean) -> Unit
     ) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .document(myId)
             .update("wait", FieldValue.arrayRemove(userId))
             .addOnSuccessListener {
@@ -82,7 +81,7 @@ class WaitViewModel @Inject constructor(
     }
 
     private fun addBlockUser(myId: String, userId: String, callBack: (Boolean) -> Unit) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .document(myId)
             .update("block", FieldValue.arrayUnion(userId))
             .addOnCompleteListener {
@@ -100,7 +99,7 @@ class WaitViewModel @Inject constructor(
     }
 
     private fun addUser(userId1: String, userId2: String, callBack: (Boolean) -> Unit) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .document(userId1)
             .update("friend", FieldValue.arrayUnion(userId2))
             .addOnCompleteListener {

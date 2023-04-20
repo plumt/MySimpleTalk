@@ -1,13 +1,11 @@
 package com.yun.mysimpletalk.util
 
-import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
-import com.yun.mysimpletalk.common.constants.FirebaseConstants
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Field.MEMBERS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.CHATS
-import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USERS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.ERROR
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.EXISTS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.NOT_EXISTS
@@ -28,7 +26,7 @@ object FirebaseUtil {
      */
     fun updateToken(userId: String, token: String, callBack: (Boolean) -> Unit) {
         FirebaseFirestore.getInstance()
-            .collection(USER)
+            .collection(USERS)
             .document(userId)
             .update("token", token)
             .addOnCompleteListener { callBack(it.isSuccessful) }
@@ -39,7 +37,7 @@ object FirebaseUtil {
      */
     fun deleteUser(userId: String, callBack: (Boolean) -> Unit) {
         FirebaseFirestore.getInstance()
-            .collection(USER)
+            .collection(USERS)
             .document(userId)
             .delete().addOnCompleteListener { callBack(it.isSuccessful) }
     }
@@ -48,7 +46,7 @@ object FirebaseUtil {
      * 닉네임 체크
      */
     fun nickNameCheck(nickName: String, callBack: (String?) -> Unit) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .whereEqualTo("name", nickName)
             .get()
             .addOnSuccessListener { documents ->
@@ -62,7 +60,7 @@ object FirebaseUtil {
      * 닉네임 배열 체크
      */
     fun nickNameCheck(userId: String, userId2: String, callBack: (String) -> Unit) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .document(userId)
             .get()
             .addOnSuccessListener { documentSnapshot ->

@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.base.ListLiveData
 import com.yun.mysimpletalk.common.constants.FirebaseConstants
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USERS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.ERROR
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.EXISTS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.NOT_EXISTS
@@ -23,7 +24,7 @@ class HomeViewModel @Inject constructor(
 ) : BaseViewModel(application) {
 
     /**
-     * 친구 요청한 유저 리스트
+     * 친구 유저 리스트
      */
     val friendUsers = ListLiveData<UserModel.User>()
 
@@ -43,7 +44,7 @@ class HomeViewModel @Inject constructor(
                 }
                 NOT_EXISTS -> {
                     // 등록 가능
-                    FirebaseFirestore.getInstance().collection(FirebaseConstants.Path.USER)
+                    FirebaseFirestore.getInstance().collection(FirebaseConstants.Path.USERS)
                         .document(friendId)
                         .update("wait", FieldValue.arrayUnion(userId))
                         .addOnCompleteListener {
@@ -57,14 +58,15 @@ class HomeViewModel @Inject constructor(
     }
 
     fun selectFriend(documents: ArrayList<String>) {
-        FirebaseFirestore.getInstance().collection(FirebaseConstants.Path.USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .whereIn(FieldPath.documentId(), documents)
             .get()
             .addOnSuccessListener {
-                friendUsers.clear(true)
+                val friends = arrayListOf<UserModel.User>()
                 it.forEachIndexed { index, snap ->
-                    friendUsers.add(UserModel.User(index, snap.id,snap.getString("profile")!! ,snap.getString("name")!!))
+                    friends.add(UserModel.User(index, snap.id,snap.getString("profile")!! ,snap.getString("name")!!))
                 }
+                friendUsers.value = friends
             }
             .addOnFailureListener {
                 it.printStackTrace()

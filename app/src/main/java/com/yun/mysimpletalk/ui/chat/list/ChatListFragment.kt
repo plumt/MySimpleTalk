@@ -30,8 +30,14 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
         }
 
         selectChatList(sVM.userInfo.value!!.userId){
-            it?.forEach {
-                Log.d("lys","members > ${it.data["members"]}")
+            viewModel.chatList.clear()
+            if(it != null){
+                it.forEach {
+                    Log.d("lys","members > ${it.data["members"]}")
+                    val members = it.data["members"] as ArrayList<String>
+                    viewModel.chatList.add(if(members[0] == sVM.userInfo.value!!.userId) members[1] else members[0])
+                }
+                //TODO 친구 목록과 비교해서 이름과 이미지 파일 가져와서 리사이클러 뷰로 나열하면 될듯
             }
         }
     }

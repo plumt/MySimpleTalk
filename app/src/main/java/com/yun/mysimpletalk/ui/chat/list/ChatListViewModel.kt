@@ -9,4 +9,6 @@ import javax.inject.Inject
 class ChatListViewModel @Inject constructor(
     application: Application
 ) : BaseViewModel(application) {
+
+    var chatList = arrayListOf<String>()
 }

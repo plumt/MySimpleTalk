@@ -8,7 +8,7 @@ import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
-import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USERS
 import com.yun.mysimpletalk.data.model.UserModel
 import com.yun.mysimpletalk.util.FirebaseUtil.getToken
 import com.yun.mysimpletalk.util.FirebaseUtil.updateToken
@@ -26,7 +26,7 @@ class LoginViewModel @Inject constructor(
     val userInfo: LiveData<UserModel.Info> get() = _userInfo
 
     fun memberCheck(userId: String, type: String, callBack: (String) -> Unit) {
-        FirebaseFirestore.getInstance().collection(USER)
+        FirebaseFirestore.getInstance().collection(USERS)
             .document(userId)
             .get()
             .addOnSuccessListener { document ->
@@ -68,7 +68,7 @@ class LoginViewModel @Inject constructor(
         callBack: (Boolean) -> Unit
     ) {
         getToken { token ->
-            FirebaseFirestore.getInstance().collection(USER)
+            FirebaseFirestore.getInstance().collection(USERS)
                 .document(userId)
                 .set(signupParams(nickName, token, type))
                 .addOnSuccessListener {
