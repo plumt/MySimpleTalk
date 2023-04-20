@@ -35,13 +35,23 @@ class LoginViewModel @Inject constructor(
                         updateToken(userId, token) { success ->
                             if (success) {
                                 val name = document.getString("name")!!
+                                val profile = document.getString("profile")!!
                                 val friends =
                                     document.get("friend") as? ArrayList<String> ?: arrayListOf()
                                 val block =
                                     document.get("block") as? ArrayList<String> ?: arrayListOf()
                                 val wait =
                                     document.get("wait") as? ArrayList<String> ?: arrayListOf()
-                                setUserInfo(userId, token, name, type, friends, block, wait)
+                                setUserInfo(
+                                    userId,
+                                    token,
+                                    name,
+                                    profile,
+                                    type,
+                                    friends,
+                                    block,
+                                    wait
+                                )
                                 callBack(MEMBER)
                             } else callBack(ERROR)
                         }
@@ -53,6 +63,7 @@ class LoginViewModel @Inject constructor(
     fun fbSignUp(
         userId: String,
         nickName: String,
+        profile: String,
         type: String,
         callBack: (Boolean) -> Unit
     ) {
@@ -62,7 +73,7 @@ class LoginViewModel @Inject constructor(
                 .set(signupParams(nickName, token, type))
                 .addOnSuccessListener {
                     setUserInfo(
-                        userId, token, nickName, type, arrayListOf(), arrayListOf(),
+                        userId, token, nickName, profile, type, arrayListOf(), arrayListOf(),
                         arrayListOf()
                     )
                     callBack(true)
@@ -74,12 +85,14 @@ class LoginViewModel @Inject constructor(
         userId: String,
         token: String,
         nickName: String,
+        profile: String,
         type: String,
         friend: ArrayList<String>,
         block: ArrayList<String>,
         wait: ArrayList<String>
     ) {
-        _userInfo.value = UserModel.Info(userId, token, nickName, type, friend, block, wait)
+        _userInfo.value =
+            UserModel.Info(userId, token, nickName, profile, type, friend, block, wait)
         sPrefs.setString(mContext, "login", type)
     }
 

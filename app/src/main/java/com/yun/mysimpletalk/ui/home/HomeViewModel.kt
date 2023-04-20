@@ -63,7 +63,7 @@ class HomeViewModel @Inject constructor(
             .addOnSuccessListener {
                 friendUsers.clear(true)
                 it.forEachIndexed { index, snap ->
-                    friendUsers.add(UserModel.User(index, snap.id, snap.getString("name")!!))
+                    friendUsers.add(UserModel.User(index, snap.id,snap.getString("profile")!! ,snap.getString("name")!!))
                 }
             }
             .addOnFailureListener {

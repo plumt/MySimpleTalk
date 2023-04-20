@@ -46,7 +46,14 @@ class WaitViewModel @Inject constructor(
             .get()
             .addOnSuccessListener {
                 it.forEachIndexed { index, snap ->
-                    waitUsers.add(UserModel.User(index, snap.id, snap.getString("name")!!))
+                    waitUsers.add(
+                        UserModel.User(
+                            index,
+                            snap.id,
+                            snap.getString("profile")!!,
+                            snap.getString("name")!!
+                        )
+                    )
                 }
             }
             .addOnFailureListener {
@@ -54,12 +61,17 @@ class WaitViewModel @Inject constructor(
             }
     }
 
-    private fun removeWaitUser(flag: String,myId: String, userId: String, callBack: (Boolean) -> Unit) {
+    private fun removeWaitUser(
+        flag: String,
+        myId: String,
+        userId: String,
+        callBack: (Boolean) -> Unit
+    ) {
         FirebaseFirestore.getInstance().collection(USER)
             .document(myId)
-            .update("wait",FieldValue.arrayRemove(userId))
+            .update("wait", FieldValue.arrayRemove(userId))
             .addOnSuccessListener {
-                when(flag){
+                when (flag) {
                     "block" -> addBlockUser(myId, userId, callBack)
                     "accept" -> addFriendUser(myId, userId, callBack)
                     else -> callBack(false)
@@ -90,22 +102,20 @@ class WaitViewModel @Inject constructor(
     }
 
     fun blockUser(myId: String, item: UserModel.User, callBack: (Boolean) -> Unit) {
-        removeWaitUser("block",myId, item.userId) { success ->
+        removeWaitUser("block", myId, item.userId) { success ->
             if (success) {
                 waitUsers.remove(item)
                 callBack(true)
-            }
-            else callBack(false)
+            } else callBack(false)
         }
     }
 
     fun acceptUser(myId: String, item: UserModel.User, callBack: (Boolean) -> Unit) {
-        removeWaitUser("accept",myId, item.userId) { success ->
+        removeWaitUser("accept", myId, item.userId) { success ->
             if (success) {
                 waitUsers.remove(item)
                 callBack(true)
-            }
-            else callBack(false)
+            } else callBack(false)
         }
     }
 }

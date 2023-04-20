@@ -36,13 +36,14 @@ class SplashViewModel @Inject constructor(
                             if (success) {
                                 val name = document.getString("name")!!
                                 val type = document.getString("type")!!
+                                val profile = document.getString("profile")!!
                                 val friends =
                                     document.get("friend") as? ArrayList<String> ?: arrayListOf()
                                 val block =
                                     document.get("block") as? ArrayList<String> ?: arrayListOf()
                                 val wait =
                                     document.get("wait") as? ArrayList<String> ?: arrayListOf()
-                                setUserInfo(userId, token, name, type, friends,block, wait)
+                                setUserInfo(userId, token, name, profile, type, friends,block, wait)
                                 callBack(MEMBER)
                             } else callBack(ERROR)
                         }
@@ -55,12 +56,13 @@ class SplashViewModel @Inject constructor(
         userId: String,
         token: String,
         nickName: String,
+        profile: String,
         type: String,
         friends: ArrayList<String>,
         block: ArrayList<String>,
         wait: ArrayList<String>
     ) {
-        _userInfo.value = UserModel.Info(userId, token, nickName, type, friends,block, wait)
+        _userInfo.value = UserModel.Info(userId, token, nickName, profile, type, friends,block, wait)
         sPrefs.setString(mContext, "login", type)
     }
 }

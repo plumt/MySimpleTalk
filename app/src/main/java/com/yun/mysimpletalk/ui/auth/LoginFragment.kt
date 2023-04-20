@@ -107,8 +107,8 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
             setDialogListener(object : EdittextDialog.CustomDialogListener {
                 override fun onResult(result: String) {
                     nickNameCheck(result) { id ->
-                        if(id == ""){
-                            viewModel.fbSignUp(userId,result,loginType){ success ->
+                        if (id == "") {
+                            viewModel.fbSignUp(userId, result, "", loginType) { success ->
                                 if (success) {
                                     dismissDialog()
                                     navigate(R.id.action_loginFragment_to_homeFragment)

@@ -7,6 +7,7 @@ class UserModel {
         val userId: String,
         val pushToken: String,
         val nickName: String,
+        val profile: String,
         val loginType: String,
         val friends: ArrayList<String>,
         val block: ArrayList<String>,
@@ -16,6 +17,7 @@ class UserModel {
     data class User(
         override var id: Int,
         val userId: String,
+        val profile: String,
         val nickName: String
     ) : Item()
 }
