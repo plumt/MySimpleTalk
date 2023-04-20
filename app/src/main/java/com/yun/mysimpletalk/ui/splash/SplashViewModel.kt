@@ -1,18 +1,16 @@
 package com.yun.mysimpletalk.ui.splash
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.messaging.FirebaseMessaging
-import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseViewModel
-import com.yun.mysimpletalk.common.constants.AuthConstants
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
 import com.yun.mysimpletalk.data.UserModel
+import com.yun.mysimpletalk.util.FirebaseUtil.getToken
+import com.yun.mysimpletalk.util.FirebaseUtil.updateToken
 import com.yun.mysimpletalk.util.PreferenceUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -34,35 +32,22 @@ class SplashViewModel @Inject constructor(
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    updatePushToken(
-                        userId,
-                        document.getString("name")!!,
-                        document.getString("type")!!,
-                        callBack
-                    )
+                    getToken { token ->
+                        updateToken(userId, token) { success ->
+                            if (success) {
+                                val name = document.getString("name")!!
+                                val type = document.getString("type")!!
+                                setUserInfo(userId, token, name, type)
+                                callBack(MEMBER)
+                            } else callBack(ERROR)
+                        }
+                    }
                 } else callBack(SIGNUP)
             }.addOnFailureListener { callBack(ERROR) }
     }
 
-    private fun updatePushToken(
-        userId: String,
-        name: String,
-        type: String,
-        callBack: (String) -> Unit
-    ) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener {t ->
-            fs.collection("User")
-                .document(userId)
-                .update("token", t.result)
-                .addOnCompleteListener {
-                    val info = UserModel.Info(userId, t.result, name, type)
-                    _userInfo.value = info
-                    callBack(MEMBER)
-                }
-                .addOnFailureListener {
-                    callBack(ERROR)
-                }
-        }.addOnFailureListener { callBack(ERROR) }
-
+    private fun setUserInfo(userId: String, token: String, nickName: String, type: String) {
+        _userInfo.value = UserModel.Info(userId, token, nickName, type)
+        sPrefs.setString(mContext, "login", type)
     }
 }

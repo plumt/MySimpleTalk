@@ -1,17 +1,16 @@
 package com.yun.mysimpletalk.ui.auth
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.messaging.FirebaseMessaging
-import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseViewModel
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.ERROR
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.SIGNUP
 import com.yun.mysimpletalk.data.UserModel
+import com.yun.mysimpletalk.util.FirebaseUtil.getToken
+import com.yun.mysimpletalk.util.FirebaseUtil.updateToken
 import com.yun.mysimpletalk.util.PreferenceUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -33,26 +32,14 @@ class LoginViewModel @Inject constructor(
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    FirebaseMessaging.getInstance().token.addOnCompleteListener { t ->
-                        fs.collection("User")
-                            .document(userId)
-                            .update("token", t.result)
-                            .addOnCompleteListener {
-                                val info = UserModel.Info(
-                                    userId,
-                                    t.result,
-                                    document.getString("name")!!,
-                                    document.getString("type")!!
-                                )
-                                _userInfo.value = info
-                                sPrefs.setString(mContext, "login", type)
+                    getToken { token ->
+                        updateToken(userId, token) { success ->
+                            if (success) {
+                                setUserInfo(userId, token, document.getString("name")!!, type)
                                 callBack(MEMBER)
-                            }
-                            .addOnFailureListener {
-                                callBack(ERROR)
-                            }
-                    }.addOnFailureListener { callBack(ERROR) }
-
+                            } else callBack(ERROR)
+                        }
+                    }
                 } else callBack(SIGNUP)
             }.addOnFailureListener { callBack(ERROR) }
     }
@@ -63,30 +50,15 @@ class LoginViewModel @Inject constructor(
         type: String,
         callBack: (Boolean) -> Unit
     ) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener {
-            Log.d("lys", "FirebaseMessaging.getInstance().token > ${it.result}")
+        getToken { token ->
             fs.collection("User")
                 .document(userId)
-                .set(
-                    mapOf(
-                        "name" to nickName,
-                        "token" to it.result,
-                        "type" to type
-                    )
-                )
-                .addOnSuccessListener { _ ->
-                    val info = UserModel.Info(
-                        userId,
-                        it.result,
-                        nickName,
-                        type
-                    )
-                    _userInfo.value = info
-                    sPrefs.setString(mContext, "login", type)
+                .set(signupParams(nickName, token, type))
+                .addOnSuccessListener {
+                    setUserInfo(userId, token, nickName, type)
                     callBack(true)
-                }
-                .addOnFailureListener { callBack(false) }
-        }.addOnFailureListener { callBack(false) }
+                }.addOnFailureListener { callBack(false) }
+        }
     }
 
     fun nickNameCheck(userId: String, nickName: String, type: String, callBack: (Boolean) -> Unit) {
@@ -99,4 +71,15 @@ class LoginViewModel @Inject constructor(
             }
             .addOnFailureListener { callBack(false) }
     }
+
+    private fun setUserInfo(userId: String, token: String, nickName: String, type: String) {
+        _userInfo.value = UserModel.Info(userId, token, nickName, type)
+        sPrefs.setString(mContext, "login", type)
+    }
+
+    private fun signupParams(nickName: String, token: String, type: String) = mapOf(
+        "name" to nickName,
+        "token" to token,
+        "type" to type
+    )
 }

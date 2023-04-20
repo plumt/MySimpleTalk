@@ -9,6 +9,7 @@ import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
 import com.yun.mysimpletalk.databinding.FragmentSettingBinding
+import com.yun.mysimpletalk.ui.main.MainActivity
 import com.yun.mysimpletalk.util.AuthUtil.snsLogout
 import com.yun.mysimpletalk.util.AuthUtil.snsSignout
 import com.yun.mysimpletalk.util.PreferenceUtil
@@ -81,12 +82,18 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
             fs.collection("User")
                 .document(sharedViewModel.userInfo.value!!.userId)
                 .update("token", "")
-                .addOnCompleteListener { navigate(R.id.action_settingFragment_to_loginFragment) }
+                .addOnCompleteListener { moveLoginScreen() }
                 .addOnFailureListener {
                     //TODO 토큰 삭제 실패
                 }
         }.addOnFailureListener {
             //TODO 토큰 삭제 실패
         }
+    }
+
+    private fun moveLoginScreen(){
+        sharedViewModel.setUserInfo(null)
+        navigate(R.id.action_settingFragment_to_loginFragment)
+        (requireActivity() as MainActivity).binding.bottomNavView.selectedItemId = R.id.home
     }
 }

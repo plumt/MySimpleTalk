@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
             bottomNavView.run {
                 setOnItemSelectedListener { menuItem ->
                     Log.d("lys", "menuItem.title > ${menuItem.title}")
+                    if(mainViewModel.userInfo.value == null) return@setOnItemSelectedListener true
                     when (menuItem.title) {
                         "홈" -> navController.navigate(R.id.action_global_homeFragment)
                         "채팅" -> navController.navigate(R.id.action_global_chatFragment)

@@ -15,7 +15,7 @@ class MainViewModel @Inject constructor(application: Application) : BaseViewMode
     private val _isBottomVisible = MutableLiveData(false)
     val isBottomVisible: LiveData<Boolean> get() = _isBottomVisible
 
-    fun setUserInfo(info: UserModel.Info){
+    fun setUserInfo(info: UserModel.Info?){
         _userInfo.value = info
     }
 
