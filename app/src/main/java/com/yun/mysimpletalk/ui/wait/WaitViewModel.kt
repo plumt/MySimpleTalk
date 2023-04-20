@@ -24,7 +24,7 @@ class WaitViewModel @Inject constructor(
     val waitUsers = ListLiveData<UserModel.User>()
 
     fun checkWaitCount(userInfo: UserModel.Info) {
-        FirebaseFirestore.getInstance().collection(FirebaseConstants.Path.USER)
+        FirebaseFirestore.getInstance().collection(USER)
             .document(userInfo.userId)
             .get()
             .addOnSuccessListener {
@@ -41,7 +41,7 @@ class WaitViewModel @Inject constructor(
     }
 
     private fun selectFriend(documents: ArrayList<String>) {
-        FirebaseFirestore.getInstance().collection(FirebaseConstants.Path.USER)
+        FirebaseFirestore.getInstance().collection(USER)
             .whereIn(FieldPath.documentId(), documents)
             .get()
             .addOnSuccessListener {
@@ -92,11 +92,18 @@ class WaitViewModel @Inject constructor(
     }
 
     private fun addFriendUser(myId: String, userId: String, callBack: (Boolean) -> Unit) {
+        addUser(myId, userId) { success ->
+            if (success) {
+                addUser(userId, myId, callBack)
+            } else callBack(false)
+        }
+    }
+
+    private fun addUser(userId1: String, userId2: String, callBack: (Boolean) -> Unit) {
         FirebaseFirestore.getInstance().collection(USER)
-            .document(myId)
-            .update("friend", FieldValue.arrayUnion(userId))
+            .document(userId1)
+            .update("friend", FieldValue.arrayUnion(userId2))
             .addOnCompleteListener {
-                Log.d("lys", "add friend > ${it.isSuccessful}")
                 callBack(it.isSuccessful)
             }
     }

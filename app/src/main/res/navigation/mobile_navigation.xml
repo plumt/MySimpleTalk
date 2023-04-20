@@ -13,7 +13,7 @@
 
     <action
         android:id="@+id/action_global_chatFragment"
-        app:destination="@+id/chatFragment"
+        app:destination="@+id/chatListFragment"
         app:popUpTo="@id/mobile_navigation"
         app:popUpToInclusive="true" />
 
@@ -37,10 +37,15 @@
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.yun.mysimpletalk.ui.home.HomeFragment"
-        android:label="HomeFragment" >
+        android:label="HomeFragment">
         <action
             android:id="@+id/action_homeFragment_to_waitFragment"
             app:destination="@id/waitFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_chattingFragment"
+            app:destination="@id/chattingFragment"
+            app:popUpTo="@id/mobile_navigation"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/splashFragment"
@@ -58,9 +63,15 @@
             app:popUpToInclusive="true" />
     </fragment>
     <fragment
-        android:id="@+id/chatFragment"
+        android:id="@+id/chatListFragment"
         android:name="com.yun.mysimpletalk.ui.chat.list.ChatListFragment"
-        android:label="ChatFragment" />
+        android:label="ChatListFragment">
+        <action
+            android:id="@+id/action_chatListFragment_to_chattingFragment"
+            app:destination="@id/chattingFragment"
+            app:popUpTo="@id/mobile_navigation"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/settingFragment"
         android:name="com.yun.mysimpletalk.ui.setting.SettingFragment"
@@ -75,6 +86,10 @@
         android:id="@+id/waitFragment"
         android:name="com.yun.mysimpletalk.ui.wait.WaitFragment"
         android:label="WaitFragment" />
+    <fragment
+        android:id="@+id/chattingFragment"
+        android:name="com.yun.mysimpletalk.ui.chat.chatting.ChattingFragment"
+        android:label="ChattingFragment" />
 
 
 </navigation>

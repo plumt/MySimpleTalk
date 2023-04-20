@@ -23,6 +23,11 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        sVM.let { sv ->
+
+            sv.showBottomNav()
+        }
+
         selectChatList(""){
 
         }
