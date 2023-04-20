@@ -15,8 +15,11 @@ import com.google.firebase.firestore.model.mutation.FieldMask
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.base.BaseFragment
+import com.yun.mysimpletalk.base.BaseRecyclerAdapter
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
+import com.yun.mysimpletalk.data.model.UserModel
 import com.yun.mysimpletalk.databinding.FragmentHomeBinding
+import com.yun.mysimpletalk.databinding.ItemHomeBinding
 import com.yun.mysimpletalk.ui.dialog.EdittextDialog
 import com.yun.mysimpletalk.util.FirebaseUtil.nickNameCheck
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,11 +38,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
         super.onViewCreated(view, savedInstanceState)
 
         sharedViewModel.let { sv ->
-            sv.userInfo.observe(viewLifecycleOwner) {
-                Log.d("lys", "userInfo > $it")
-            }
 
             sv.showBottomNav()
+
+            sv.userInfo.observe(viewLifecycleOwner) { info ->
+                Log.d("lys", "userInfo > $info")
+                if (info != null && !info.friends.isNullOrEmpty()) {
+                    viewModel.selectFriend(info.friends)
+                }
+            }
 
             if (sv.userInfo.value != null) {
                 binding.tv.text = sv.userInfo.value.toString()
@@ -47,6 +54,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
         }
 
         binding.let { v ->
+
+            v.rvHome.apply {
+                adapter = object : BaseRecyclerAdapter.Create<UserModel.User, ItemHomeBinding>(
+                    R.layout.item_home,
+                    BR.itemHome,
+                    BR.homeListener
+                ) {
+                    override fun onItemClick(item: UserModel.User, view: View) {
+
+                    }
+
+                    override fun onItemLongClick(item: UserModel.User, view: View): Boolean = true
+                }
+            }
+
             v.btnAddFriend.setOnClickListener {
                 searchFriend()
             }

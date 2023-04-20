@@ -34,7 +34,10 @@ class LoginViewModel @Inject constructor(
                     getToken { token ->
                         updateToken(userId, token) { success ->
                             if (success) {
-                                setUserInfo(userId, token, document.getString("name")!!, type)
+                                val name = document.getString("name")!!
+                                val friends =
+                                    document.get("friend") as? ArrayList<String> ?: arrayListOf()
+                                setUserInfo(userId, token,name , type, friends)
                                 callBack(MEMBER)
                             } else callBack(ERROR)
                         }
@@ -54,14 +57,20 @@ class LoginViewModel @Inject constructor(
                 .document(userId)
                 .set(signupParams(nickName, token, type))
                 .addOnSuccessListener {
-                    setUserInfo(userId, token, nickName, type)
+                    setUserInfo(userId, token, nickName, type, arrayListOf())
                     callBack(true)
                 }.addOnFailureListener { callBack(false) }
         }
     }
 
-    private fun setUserInfo(userId: String, token: String, nickName: String, type: String) {
-        _userInfo.value = UserModel.Info(userId, token, nickName, type)
+    private fun setUserInfo(
+        userId: String,
+        token: String,
+        nickName: String,
+        type: String,
+        friend: ArrayList<String>
+    ) {
+        _userInfo.value = UserModel.Info(userId, token, nickName, type, friend)
         sPrefs.setString(mContext, "login", type)
     }
 

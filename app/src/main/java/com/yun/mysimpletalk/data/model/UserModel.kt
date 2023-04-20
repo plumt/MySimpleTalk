@@ -7,7 +7,8 @@ class UserModel {
         val userId: String,
         val pushToken: String,
         val nickName: String,
-        val loginType: String
+        val loginType: String,
+        val friends: ArrayList<String>
     )
 
     data class User(

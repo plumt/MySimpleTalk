@@ -36,7 +36,9 @@ class SplashViewModel @Inject constructor(
                             if (success) {
                                 val name = document.getString("name")!!
                                 val type = document.getString("type")!!
-                                setUserInfo(userId, token, name, type)
+                                val friends =
+                                    document.get("friend") as? ArrayList<String> ?: arrayListOf()
+                                setUserInfo(userId, token, name, type, friends)
                                 callBack(MEMBER)
                             } else callBack(ERROR)
                         }
@@ -45,8 +47,14 @@ class SplashViewModel @Inject constructor(
             }.addOnFailureListener { callBack(ERROR) }
     }
 
-    private fun setUserInfo(userId: String, token: String, nickName: String, type: String) {
-        _userInfo.value = UserModel.Info(userId, token, nickName, type)
+    private fun setUserInfo(
+        userId: String,
+        token: String,
+        nickName: String,
+        type: String,
+        friends: ArrayList<String>
+    ) {
+        _userInfo.value = UserModel.Info(userId, token, nickName, type, friends)
         sPrefs.setString(mContext, "login", type)
     }
 }
