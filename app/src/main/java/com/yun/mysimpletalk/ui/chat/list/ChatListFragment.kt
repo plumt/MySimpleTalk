@@ -1,6 +1,7 @@
 package com.yun.mysimpletalk.ui.chat.list
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import com.yun.mysimpletalk.R
@@ -28,8 +29,10 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
             sv.showBottomNav()
         }
 
-        selectChatList(""){
-
+        selectChatList(sVM.userInfo.value!!.userId){
+            it?.forEach {
+                Log.d("lys","members > ${it.data["members"]}")
+            }
         }
     }
 }

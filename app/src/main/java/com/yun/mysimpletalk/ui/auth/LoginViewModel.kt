@@ -96,9 +96,16 @@ class LoginViewModel @Inject constructor(
         sPrefs.setString(mContext, "login", type)
     }
 
-    private fun signupParams(nickName: String, token: String, type: String) = mapOf(
+    private fun signupParams(
+        nickName: String, token: String, type: String
+    ) = mapOf(
         "name" to nickName,
         "token" to token,
-        "type" to type
+        "type" to type,
+        "profile" to "",
+        "friend" to listOf<String>(),
+        "block" to listOf<String>(),
+        "wait" to listOf<String>()
+
     )
 }

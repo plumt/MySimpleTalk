@@ -5,6 +5,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
 import com.yun.mysimpletalk.common.constants.FirebaseConstants
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Field.MEMBERS
+import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.CHATS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USER
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.ERROR
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.EXISTS
@@ -72,8 +74,20 @@ object FirebaseUtil {
     }
 
     fun selectChatList(userId: String, callBack: (QuerySnapshot?) -> Unit) {
-        FirebaseFirestore.getInstance().collection("chat")
-            .whereArrayContains("members", userId)
+        FirebaseFirestore.getInstance().collection(CHATS)
+            .whereArrayContains(MEMBERS, userId)
+            .get()
+            .addOnSuccessListener {
+                callBack(it)
+            }
+            .addOnFailureListener { callBack(null) }
+    }
+
+    fun selectChatRoom(userId1: String, userId2: String, callBack: (QuerySnapshot?) -> Unit) {
+        val members = if (userId1 > userId2) listOf(listOf(userId1, userId2))
+        else listOf(listOf(userId2, userId1))
+        FirebaseFirestore.getInstance().collection(CHATS)
+            .whereIn(MEMBERS, members)
             .get()
             .addOnSuccessListener {
                 callBack(it)

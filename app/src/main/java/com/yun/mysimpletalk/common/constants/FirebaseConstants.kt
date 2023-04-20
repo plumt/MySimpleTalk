@@ -3,7 +3,12 @@ package com.yun.mysimpletalk.common.constants
 class FirebaseConstants {
 
     object Path {
-        const val USER = "User"
+        const val USER = "Users"
+        const val CHATS = "Chats"
+    }
+
+    object Field {
+        const val MEMBERS = "members"
     }
 
     object Result {

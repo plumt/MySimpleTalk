@@ -55,7 +55,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
                 ) {
                     override fun onItemClick(item: UserModel.User, view: View) {
                         Toast.makeText(requireActivity(),item.nickName,Toast.LENGTH_SHORT).show()
-                        navigate(R.id.action_homeFragment_to_chattingFragment)
+                        navigate(R.id.action_homeFragment_to_chattingFragment,Bundle().apply {
+                            putString("userId",item.userId)
+                        })
                     }
 
                     override fun onItemLongClick(item: UserModel.User, view: View): Boolean = true
