@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 .addSnapshotListener { value, error ->
                     if (error != null) return@addSnapshotListener
                     if (value != null && value.exists()) {
-                        mainViewModel.setUserInfo(value.data)
+                        mainViewModel.setUserInfo(id,value.data)
                         Log.d("lys", "value > ${value.data}")
                     }
                 }

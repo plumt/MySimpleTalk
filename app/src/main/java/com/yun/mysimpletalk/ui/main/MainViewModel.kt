@@ -27,17 +27,17 @@ class MainViewModel @Inject constructor(application: Application) : BaseViewMode
      */
     val friendUsers = ListLiveData<UserModel.User>()
 
-    fun setUserInfo(info: Map<String, Any>?) {
+    fun setUserInfo(id: String?, info: Map<String, Any>?) {
         friendUsers.value = arrayListOf()
-        if (info == null) _userInfo.value = null
+        if (info == null || id == null) _userInfo.value = null
         else {
-            _userInfo.value = userInfoParams(info)
+            _userInfo.value = userInfoParams(id, info)
             selectFriend(userInfo.value!!.friends)
         }
     }
 
-    private fun userInfoParams(info: Map<String, Any>) = UserModel.Info(
-        "userId",
+    private fun userInfoParams(userId: String, info: Map<String, Any>) = UserModel.Info(
+        userId,
         info["token"].toString(),
         info["name"].toString(),
         info["profile"].toString(),

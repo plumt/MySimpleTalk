@@ -40,7 +40,7 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
     }
 
     private fun chatRoomSetting(userId: String) {
-        selectChatRoom(sVM.userInfo.value!!.userId, userId) {
+        selectChatRoom(sVM.myId.value!!, userId) {
             if (it == null) Log.d("lys", "서버 에러")
             else if (it.isEmpty) {
                 Log.d("lys", "채팅방 아직 없음")

@@ -36,29 +36,29 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
                 BR.roomListener
             ) {
                 override fun onItemClick(item: ChatModel.Room, view: View) {
-
+                    navigate(R.id.action_chatListFragment_to_chattingFragment, Bundle().apply {
+                        putString("userId", item.members.find { it != sVM.myId.value!! })
+                    })
                 }
 
                 override fun onItemLongClick(item: ChatModel.Room, view: View): Boolean = true
             }
         }
 
-        selectChatList(sVM.myId.value!!){
+        selectChatList(sVM.myId.value!!) {
             val rooms = arrayListOf<ChatModel.Room>()
             it?.documents?.forEachIndexed { index, snap ->
-                Log.d("lys","selectChatList > ${snap.data}")
-                rooms.add(ChatModel.Room(index,snap.id,snap["members"] as ArrayList<String>,"채팅방제목"))
+                Log.d("lys", "selectChatList > ${snap.data}")
+                rooms.add(
+                    ChatModel.Room(
+                        index,
+                        snap.id,
+                        snap["members"] as ArrayList<String>,
+                        "채팅방제목"
+                    )
+                )
             }
             viewModel.chatList.value = rooms
         }
-
-//        selectChatList(sVM.userInfo.value!!.userId) {
-//            viewModel.chatList.clear()
-//            it?.forEach {
-//                Log.d("lys", "members > ${it.data["members"]}")
-//                val members = it.data["members"] as ArrayList<String>
-//                viewModel.chatList.add(if(members[0] == sVM.userInfo.value!!.userId) members[1] else members[0])
-//            }
-//        }
     }
 }

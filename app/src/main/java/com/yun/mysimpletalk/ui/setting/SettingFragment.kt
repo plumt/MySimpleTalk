@@ -113,7 +113,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
      * 나의 정보 구독 삭제
      */
     private fun moveLoginScreen() {
-        sVM.setUserInfo(null)
+        sVM.setUserInfo(null,null)
         sVM.setMyId(null)
         sVM.friendUsers.value = arrayListOf()
         (requireActivity() as MainActivity).listenerRemove()
