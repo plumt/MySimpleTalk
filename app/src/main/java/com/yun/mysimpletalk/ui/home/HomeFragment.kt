@@ -1,12 +1,11 @@
 package com.yun.mysimpletalk.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.BR
+import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
 import com.yun.mysimpletalk.base.BaseRecyclerAdapter
 import com.yun.mysimpletalk.data.model.UserModel
@@ -29,26 +28,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sVM.let { sv ->
+        sVM.showBottomNav()
 
-            sv.showBottomNav()
+        binding.tv.text = sVM.userInfo.value.toString() ///////////
 
-            sv.userInfo.observe(viewLifecycleOwner) { info ->
-                Log.d("lys", "userInfo > $info")
-                if (info != null && !info.friends.isNullOrEmpty()) {
-                    viewModel.selectFriend(info.friends)
-                }
-            }
-
-            if (sv.userInfo.value != null) {
-                binding.tv.text = sv.userInfo.value.toString()
-            }
-        }
-
-        viewModel.let { v ->
-            v.friendUsers.observe(viewLifecycleOwner){
-                if(it != null) sVM.friendUsers.value = it
-            }
+        sVM.friendUsers.observe(viewLifecycleOwner) { friends ->
+            if (friends != null) viewModel.friendUsers.value = friends
         }
 
         binding.let { v ->
@@ -60,9 +45,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
                     BR.homeListener
                 ) {
                     override fun onItemClick(item: UserModel.User, view: View) {
-                        Toast.makeText(requireActivity(),item.nickName,Toast.LENGTH_SHORT).show()
-                        navigate(R.id.action_homeFragment_to_chattingFragment,Bundle().apply {
-                            putString("userId",item.userId)
+                        showToast(item.nickName)
+                        navigate(R.id.action_homeFragment_to_chattingFragment, Bundle().apply {
+                            putString("userId", item.userId)
                         })
                     }
 
@@ -80,20 +65,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
         }
     }
 
-
     private fun searchFriend() {
         EdittextDialog().run {
             showDialog(requireActivity(), "검색", "검색하실 닉네임을 입력해 주세요")
             setDialogListener(object : EdittextDialog.CustomDialogListener {
                 override fun onResult(result: String) {
                     nickNameCheck(result) { id ->
-                        if (id.isNullOrEmpty()) {
-                            Toast.makeText(
-                                requireActivity(),
-                                "해당 닉네임을 가지고 있는 사용자가 존재하지 않습니다.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
+                        if (id.isNullOrEmpty()) showToast("해당 닉네임을 가지고 있는 사용자가 존재하지 않습니다.")
+                        else if (id == sVM.userInfo.value!!.userId) showToast("본인")
+                        else {
                             dismissDialog()
                             addFriend(id)
                         }
@@ -104,17 +84,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     }
 
     private fun addFriend(friendId: String) {
-        //TODO block에 들어가 있거나, wait에 들어가 있거나 friend에 들어가 있으면 추가 X
-        if (friendId == sVM.userInfo.value!!.userId) {
-            Toast.makeText(requireActivity(), "본인", Toast.LENGTH_SHORT).show()
-        }
         viewModel.addFriend(
             friendId,
             sVM.userInfo.value!!.userId
-        ) { success ->
-            if (success) Toast.makeText(requireActivity(), "친추 성공", Toast.LENGTH_SHORT).show()
-        }
+        ) { success -> if (success) showToast("친추 성공") else showToast("잠시 후 다시 시도해 주세요.") }
     }
 
-
+    private fun showToast(msg: String) {
+        Toast.makeText(requireActivity(), msg, Toast.LENGTH_SHORT).show()
+    }
 }

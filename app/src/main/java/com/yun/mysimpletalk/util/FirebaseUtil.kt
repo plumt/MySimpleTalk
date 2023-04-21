@@ -57,6 +57,27 @@ object FirebaseUtil {
     }
 
     /**
+     * 유저 등록
+     */
+    fun insertUser(userId: String, info: Map<String, Any>, callBack: (Boolean) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USERS)
+            .document(userId)
+            .set(info)
+            .addOnCompleteListener { callBack(it.isSuccessful) }
+    }
+
+    /**
+     * 가입된 유저인지 체크
+     */
+    fun memberCheck(userId: String, callBack: (Boolean?) -> Unit) {
+        FirebaseFirestore.getInstance().collection(USERS).document(userId).get()
+            .addOnSuccessListener { document ->
+                callBack(document != null && document.exists())
+            }
+            .addOnFailureListener { callBack(null) }
+    }
+
+    /**
      * 닉네임 배열 체크
      */
     fun nickNameCheck(userId: String, userId2: String, callBack: (String) -> Unit) {
@@ -71,6 +92,9 @@ object FirebaseUtil {
             .addOnFailureListener { callBack(ERROR) }
     }
 
+    /**
+     * 채팅방 리스트
+     */
     fun selectChatList(userId: String, callBack: (QuerySnapshot?) -> Unit) {
         FirebaseFirestore.getInstance().collection(CHATS)
             .whereArrayContains(MEMBERS, userId)
@@ -81,6 +105,9 @@ object FirebaseUtil {
             .addOnFailureListener { callBack(null) }
     }
 
+    /**
+     * 채팅방
+     */
     fun selectChatRoom(userId1: String, userId2: String, callBack: (QuerySnapshot?) -> Unit) {
         val members = if (userId1 > userId2) listOf(listOf(userId1, userId2))
         else listOf(listOf(userId2, userId1))

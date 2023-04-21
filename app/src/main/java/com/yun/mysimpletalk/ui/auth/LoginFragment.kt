@@ -19,6 +19,7 @@ import com.yun.mysimpletalk.util.AuthUtil.kakaoLogin
 import com.yun.mysimpletalk.util.AuthUtil.kakaoLoginCallBack
 import com.yun.mysimpletalk.util.AuthUtil.naverLogin
 import com.yun.mysimpletalk.util.AuthUtil.naverLoginCallBack
+import com.yun.mysimpletalk.util.AuthUtil.snsLogout
 import com.yun.mysimpletalk.util.FirebaseUtil.nickNameCheck
 import com.yun.mysimpletalk.util.Util.keyHash
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,21 +39,16 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
 
         keyHash(requireActivity())
 
-        binding.let { v ->
-            v.btnNaver.setOnClickListener {
-                snsLogin(NAVER)
-            }
-            v.btnKakao.setOnClickListener {
-                snsLogin(KAKAO)
-            }
-        }
+        /**
+         * 바텀 네비바 숨김
+         */
+        sVM.hideBottomNav()
 
-        viewModel.userInfo.observe(viewLifecycleOwner) {
-            if (it != null) sVM.setUserInfo(it)
-        }
+        binding.btnNaver.setOnClickListener { snsLogin(NAVER) }
+        binding.btnKakao.setOnClickListener { snsLogin(KAKAO) }
 
-        sVM.let { sv ->
-            sv.hideBottomNav()
+        viewModel.myId.observe(viewLifecycleOwner) { id ->
+            if (id != null) sVM.setMyId(id)
         }
     }
 
@@ -85,42 +81,36 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
         }
     }
 
+    /**
+     * 파이어베이스 유저 정보 확인
+     */
     private fun fbLogin(userId: String, loginType: String) {
         viewModel.memberCheck(userId, loginType) {
             when (it) {
-                MEMBER -> navigate(R.id.action_loginFragment_to_homeFragment)
+                MEMBER -> loginSuccess()
                 SIGNUP -> showNicknameInputDialog(userId, loginType)
-                ERROR -> {
-                    when (loginType) {
-                        NAVER -> {} // 네이버 로그아웃
-                        KAKAO -> {} // 카카오 로그아웃
-                    }
-                    serverError()
-                }
+                ERROR -> snsLogout(loginType) { serverError() }
             }
         }
     }
 
     private fun showNicknameInputDialog(userId: String, loginType: String) {
         EdittextDialog().run {
-            showDialog(requireActivity(), "닉네임", "사용하실 닉네임을 입력해 주세요")
+            showDialog(requireActivity(), "회원가입", "사용하실 닉네임을 입력해 주세요")
             setDialogListener(object : EdittextDialog.CustomDialogListener {
                 override fun onResult(result: String) {
                     nickNameCheck(result) { id ->
-                        if (id == "") {
-                            viewModel.fbSignUp(userId, result, "", loginType) { success ->
-                                if (success) {
-                                    dismissDialog()
-                                    navigate(R.id.action_loginFragment_to_homeFragment)
-                                    //TODO login to home
-                                } else {
-                                    Toast.makeText(
-                                        requireActivity(),
-                                        "해당 닉네임은 사용하실 수 없습니다",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                        when (id) {
+                            "" -> {
+                                viewModel.fbSignUp(userId, result, loginType) { success ->
+                                    if (success) {
+                                        dismissDialog()
+                                        loginSuccess()
+                                    } else serverError()
                                 }
                             }
+                            null -> serverError()
+                            else -> nickNameError()
                         }
                     }
                 }
@@ -128,10 +118,18 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
         }
     }
 
+    private fun loginSuccess() {
+        navigate(R.id.action_loginFragment_to_homeFragment)
+    }
+
     /**
      * server error
      */
     private fun serverError() {
         Toast.makeText(requireActivity(), "서버 연결에 실패했습니다. 다시 시도해 주세요.", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun nickNameError() {
+        Toast.makeText(requireActivity(), "해당 닉네임은 사용하실 수 없습니다", Toast.LENGTH_SHORT).show()
     }
 }
