@@ -28,34 +28,34 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        binding.run {
-            lifecycleOwner = this@MainActivity
-            main = mainViewModel
+        binding.lifecycleOwner = this@MainActivity
+        binding.main = mainViewModel
 
-            bottomNavView.run {
-                setOnItemSelectedListener { menuItem ->
-                    Log.d("lys", "menuItem.title > ${menuItem.title}")
-                    if (mainViewModel.userInfo.value == null) return@setOnItemSelectedListener true
-                    when (menuItem.title) {
-                        "홈" -> navController.navigate(R.id.action_global_homeFragment)
-                        "채팅" -> navController.navigate(R.id.action_global_chatFragment)
-                        "일정" -> {}
-                        "설정" -> navController.navigate(R.id.action_global_settingFragment)
-                    }
-                    true
+        binding.bottomNavView.run {
+            setOnItemSelectedListener { menuItem ->
+                Log.d("lys", "menuItem.title > ${menuItem.title}")
+                if (mainViewModel.userInfo.value == null) return@setOnItemSelectedListener true
+                when (menuItem.title) {
+                    "홈" -> navController.navigate(R.id.action_global_homeFragment)
+                    "채팅" -> navController.navigate(R.id.action_global_chatFragment)
+                    "일정" -> {}
+                    "설정" -> navController.navigate(R.id.action_global_settingFragment)
                 }
+                true
             }
         }
+
+        navController = Navigation.findNavController(this, R.id.nav_host_fragment)
+        snsSdkSetting(this)
 
         mainViewModel.myId.observe(this) { id ->
             if (id != null) observeMyProfile(id)
         }
-
-        navController = Navigation.findNavController(this, R.id.nav_host_fragment)
-
-        snsSdkSetting(this)
     }
 
+    /**
+     * 나의 정보 구독
+     */
     private fun observeMyProfile(id: String) {
         infoListener =
             FirebaseFirestore.getInstance().collection(FirebaseConstants.Path.USERS)
@@ -69,8 +69,15 @@ class MainActivity : AppCompatActivity() {
                 }
     }
 
-    override fun onDestroy() {
+    /**
+     * 나의 정보 구독 해제
+     */
+    fun listenerRemove(){
         infoListener.remove()
+    }
+
+    override fun onDestroy() {
+        listenerRemove()
         super.onDestroy()
     }
 }

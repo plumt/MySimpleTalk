@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
-import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.BR
+import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
+import com.yun.mysimpletalk.base.BaseRecyclerAdapter
+import com.yun.mysimpletalk.data.model.ChatModel
 import com.yun.mysimpletalk.databinding.FragmentChatListBinding
+import com.yun.mysimpletalk.databinding.ItemRoomBinding
 import com.yun.mysimpletalk.util.FirebaseUtil.selectChatList
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,21 +27,38 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sVM.let { sv ->
+        sVM.showBottomNav()
 
-            sv.showBottomNav()
-        }
+        binding.rvRoom.apply {
+            adapter = object : BaseRecyclerAdapter.Create<ChatModel.Room, ItemRoomBinding>(
+                R.layout.item_room,
+                BR.itemRoom,
+                BR.roomListener
+            ) {
+                override fun onItemClick(item: ChatModel.Room, view: View) {
 
-        selectChatList(sVM.userInfo.value!!.userId){
-            viewModel.chatList.clear()
-            if(it != null){
-                it.forEach {
-                    Log.d("lys","members > ${it.data["members"]}")
-                    val members = it.data["members"] as ArrayList<String>
-                    viewModel.chatList.add(if(members[0] == sVM.userInfo.value!!.userId) members[1] else members[0])
                 }
-                //TODO 친구 목록과 비교해서 이름과 이미지 파일 가져와서 리사이클러 뷰로 나열하면 될듯
+
+                override fun onItemLongClick(item: ChatModel.Room, view: View): Boolean = true
             }
         }
+
+        selectChatList(sVM.myId.value!!){
+            val rooms = arrayListOf<ChatModel.Room>()
+            it?.documents?.forEachIndexed { index, snap ->
+                Log.d("lys","selectChatList > ${snap.data}")
+                rooms.add(ChatModel.Room(index,snap.id,snap["members"] as ArrayList<String>,"채팅방제목"))
+            }
+            viewModel.chatList.value = rooms
+        }
+
+//        selectChatList(sVM.userInfo.value!!.userId) {
+//            viewModel.chatList.clear()
+//            it?.forEach {
+//                Log.d("lys", "members > ${it.data["members"]}")
+//                val members = it.data["members"] as ArrayList<String>
+//                viewModel.chatList.add(if(members[0] == sVM.userInfo.value!!.userId) members[1] else members[0])
+//            }
+//        }
     }
 }

@@ -88,7 +88,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
                     deleteUser(sVM.userInfo.value!!.userId) { success ->
                         if (success) moveLoginScreen()
                         else {
-                            Log.e("lys","회원탈퇴 실패")
+                            Log.e("lys", "회원탈퇴 실패")
                         } // TODO 회원탈퇴 실패
                     }
                 }
@@ -96,7 +96,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
                     updateToken(sVM.userInfo.value!!.userId, "") { success ->
                         if (success) moveLoginScreen()
                         else {
-                            Log.e("lys","로그아웃 실패")
+                            Log.e("lys", "로그아웃 실패")
                         } // TODO 토크 삭제 실패
                     }
                 }
@@ -107,8 +107,16 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>()
     }
 
 
+    /**
+     * 나의 정보 삭제
+     * 친구 목록 삭제
+     * 나의 정보 구독 삭제
+     */
     private fun moveLoginScreen() {
         sVM.setUserInfo(null)
+        sVM.setMyId(null)
+        sVM.friendUsers.value = arrayListOf()
+        (requireActivity() as MainActivity).listenerRemove()
         navigate(R.id.action_settingFragment_to_loginFragment)
         (requireActivity() as MainActivity).binding.bottomNavView.selectedItemId = R.id.home
     }
