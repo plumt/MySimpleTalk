@@ -1,5 +1,6 @@
 package com.yun.mysimpletalk.util
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.messaging.FirebaseMessaging
@@ -9,6 +10,7 @@ import com.yun.mysimpletalk.common.constants.FirebaseConstants.Path.USERS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.ERROR
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.EXISTS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.NOT_EXISTS
+import com.yun.mysimpletalk.data.model.ChatModel
 
 object FirebaseUtil {
 
@@ -106,7 +108,7 @@ object FirebaseUtil {
     }
 
     /**
-     * 채팅방
+     * 채팅방 유무 확인
      */
     fun selectChatRoom(userId1: String, userId2: String, callBack: (QuerySnapshot?) -> Unit) {
         val members = if (userId1 > userId2) listOf(listOf(userId1, userId2))
@@ -120,5 +122,21 @@ object FirebaseUtil {
             .addOnFailureListener { callBack(null) }
     }
 
-
+    /**
+     * 메시지 보내기
+     */
+    fun sendMessage(docId: String, userId: String, message: String, callBack: (Boolean) -> Unit) {
+        val msg = mapOf(
+            "id" to userId,
+            "message" to message,
+            "read" to "1",
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+        FirebaseFirestore.getInstance().collection(CHATS)
+            .document(docId)
+            .collection("list")
+            .document()
+            .set(msg)
+            .addOnCompleteListener { callBack(it.isSuccessful) }
+    }
 }

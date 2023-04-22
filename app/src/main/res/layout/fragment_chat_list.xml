@@ -14,15 +14,14 @@
         android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
             android:id="@+id/rv_room"
             replaceAll="@{chatList.chatList}"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:overScrollMode="never"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_home"
-            />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:listitem="@layout/item_home" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

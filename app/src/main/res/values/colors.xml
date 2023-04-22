@@ -13,6 +13,11 @@
     <color name="color_FAFAFA">#FAFAFA</color>
     <color name="color_CCCCCC">#CCCCCC</color>
     <color name="color_777777">#777777</color>
-
-
+    <color name="color_534713">#534713</color>
+    <color name="color_ffd100">#ffd100</color>
+    <color name="color_297EFF">#297EFF</color>
+    <color name="color_FB3B3B">#FB3B3B</color>
+    <color name="color_50ffd100">#80FFD100</color>
+    <color name="color_e8e8e8">#e8e8e8</color>
+    <color name="color_979797">#979797</color>
 </resources>

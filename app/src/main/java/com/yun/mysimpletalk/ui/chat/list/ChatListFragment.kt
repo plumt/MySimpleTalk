@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
+import com.google.firebase.firestore.DocumentSnapshot
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.base.BaseFragment
@@ -45,20 +46,9 @@ class ChatListFragment : BaseFragment<FragmentChatListBinding, ChatListViewModel
             }
         }
 
-        selectChatList(sVM.myId.value!!) {
-            val rooms = arrayListOf<ChatModel.Room>()
-            it?.documents?.forEachIndexed { index, snap ->
-                Log.d("lys", "selectChatList > ${snap.data}")
-                rooms.add(
-                    ChatModel.Room(
-                        index,
-                        snap.id,
-                        snap["members"] as ArrayList<String>,
-                        "채팅방제목"
-                    )
-                )
-            }
-            viewModel.chatList.value = rooms
-        }
+
+        viewModel.selectChattingList(sVM.myId.value!!, sVM.friendUsers.value!!)
     }
+
+
 }
