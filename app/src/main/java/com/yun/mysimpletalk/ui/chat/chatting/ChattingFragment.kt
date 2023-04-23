@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -42,6 +43,7 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
         }
 
         binding.rvChat.apply {
+            (this.layoutManager as LinearLayoutManager).stackFromEnd = true
             adapter = object : BaseRecyclerAdapter.Create<ChatModel.Chatting, ItemChatBinding>(
                 R.layout.item_chat,
                 BR.itemChat,
@@ -69,8 +71,8 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
         FirebaseFirestore.getInstance().collection(CHATS)
             .document(viewModel.roomId.value!!)
             .collection("list")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
-            .limit(5)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(5) // 나중에 최대한으로 수정할 것
             .get()
             .addOnCompleteListener {
                 if (it.isSuccessful && it.exception == null) {
@@ -78,10 +80,10 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
 
                         val date = (snap.data!!["timestamp"] as Timestamp)
                         viewModel.chatting.add(
-                            ChatModel.Chatting(index, snap.data!!["id"] as String,"",
+                            ChatModel.Chatting(viewModel.chatting.sizes(), snap.data!!["id"] as String,"",
                             snap.data!!["message"] as String, date,snap.data!!["read"] as String)
                         )
-                        Log.d("lys", "message > ${viewModel.chatting.value!![index]}")
+                        Log.d("lys", "message > ${viewModel.chatting.value!![viewModel.chatting.sizes()-1]}")
                     }
                     selectChatListListener()
                 } else {
@@ -100,10 +102,19 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             .addSnapshotListener { value, error ->
                 if (value == null) return@addSnapshotListener
                 if (value.documents[0]["timestamp"] != null) {
-                    Log.d(
-                        "lys",
-                        "select message(${value.documents.size}) > ${value.documents[0].data}"
-                    )
+                    val date = (value.documents[0]["timestamp"] as Timestamp)
+                    val temp = arrayListOf<ChatModel.Chatting>()
+                    if(viewModel.chatting.value!!.any { it.timestamp != date && it.message == value.documents[0].data!!["message"] as String }){
+                        temp.add(ChatModel.Chatting(viewModel.chatting.sizes(), value.documents[0].data!!["id"] as String,"",
+                            value.documents[0].data!!["message"] as String, date,value.documents[0].data!!["read"] as String))
+                        temp.addAll(viewModel.chatting.value!!)
+                        viewModel.chatting.value = temp
+                        Log.d(
+                            "lys",
+                            "select message(${value.documents.size}) > ${value.documents[0].data}"
+                        )
+                    }
+
                 }
             }
     }
