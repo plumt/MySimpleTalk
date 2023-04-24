@@ -26,6 +26,12 @@ class ListLiveData<T>: MutableLiveData<ArrayList<T>>() {
         value = items
     }
 
+    fun add(index: Int, item: T){
+        val items: ArrayList<T>? = value
+        items!!.add(index,item)
+        value = items
+    }
+
     fun addAll(list: List<T>?) {
         val items: ArrayList<T>? = value
         items!!.addAll(list!!)

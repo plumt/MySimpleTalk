@@ -30,7 +30,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
 
         sVM.showBottomNav()
 
-        binding.tv.text = sVM.userInfo.value.toString() ///////////
+        sVM.userInfo.observe(viewLifecycleOwner){
+            binding.tv.text = it.toString()
+            // 지워야함 > 이거 테스트 코드
+        }
 
         sVM.friendUsers.observe(viewLifecycleOwner) { friends ->
             if (friends != null) viewModel.friendUsers.value = friends

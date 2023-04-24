@@ -2,6 +2,7 @@ package com.yun.mysimpletalk.ui.splash
 
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import com.navercorp.nid.NaverIdLoginSDK
@@ -15,6 +16,7 @@ import com.yun.mysimpletalk.common.constants.AuthConstants.UserState.MEMBER
 import com.yun.mysimpletalk.databinding.FragmentSplashBinding
 import com.yun.mysimpletalk.util.AuthUtil.kakaoLoginCallBack
 import com.yun.mysimpletalk.util.AuthUtil.naverLoginCallBack
+import com.yun.mysimpletalk.util.AuthUtil.naverTokenCheck
 import com.yun.mysimpletalk.util.PreferenceUtil
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -37,6 +39,8 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>() {
          * 하단 네비바 숨김
          */
         sVM.hideBottomNav()
+
+        Log.d("lys","loginType > ${sPrefs.getString(requireActivity(),"login")}")
 
         Handler().postDelayed({
             //TODO 지금은 딜레이 주고 있지만, 나중에는 앱 버전 체크와 퍼미션 체크(알림권한) 이후
@@ -65,12 +69,14 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>() {
         val callback: (String) -> Unit = { userId -> fbLogin(userId) }
         when (loginType) {
             NAVER -> {
-                NaverIdLoginSDK.getAccessToken()?.run {
-                    NidOAuthLogin().callProfileApi(naverLoginCallBack { user ->
-                        if (user != null) callback(user.profile!!.id!!)
-                        else moveScreen(false)
-                    })
-                } ?: moveScreen(false)
+                naverTokenCheck(requireContext()){ success ->
+                    if(success) {
+                        NidOAuthLogin().callProfileApi(naverLoginCallBack { user ->
+                            if (user != null) callback(user.profile!!.id!!)
+                            else moveScreen(false)
+                        })
+                    } else moveScreen(false)
+                }
             }
             KAKAO -> {
                 kakaoLoginCallBack { user ->

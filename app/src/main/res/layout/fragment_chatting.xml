@@ -31,6 +31,14 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:id="@+id/btn_test"
+                android:text="가져오기테스트"
+                />
+
+            <Button
                 android:id="@+id/btn_send"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"

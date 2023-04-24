@@ -11,6 +11,7 @@ import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.ERROR
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.EXISTS
 import com.yun.mysimpletalk.common.constants.FirebaseConstants.Result.NOT_EXISTS
 import com.yun.mysimpletalk.data.model.ChatModel
+import com.yun.mysimpletalk.data.model.UserModel
 
 object FirebaseUtil {
 

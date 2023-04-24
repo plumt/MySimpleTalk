@@ -73,6 +73,25 @@ object AuthUtil {
         }
     }
 
+    fun naverTokenCheck(context: Context, callBack: (Boolean) -> Unit) {
+        if (NaverIdLoginSDK.getAccessToken() != null) callBack(true)
+        else {
+            NidOAuthLogin().callRefreshAccessTokenApi(context, object : OAuthLoginCallback {
+                override fun onSuccess() {
+                    callBack(true)
+                }
+
+                override fun onError(errorCode: Int, message: String) {
+                    callBack(false)
+                }
+
+                override fun onFailure(httpStatus: Int, message: String) {
+                    callBack(false)
+                }
+            })
+        }
+    }
+
     fun kakaoLogin(context: Context, callBack: (Boolean) -> Unit) {
         if (UserApiClient.instance.isKakaoTalkLoginAvailable(context)) {
             // 카카오톡 앱 로그인
@@ -110,15 +129,15 @@ object AuthUtil {
         }
     }
 
-    fun snsLogout(type: String, callBack: (Boolean) -> Unit){
-        when(type){
+    fun snsLogout(type: String, callBack: (Boolean) -> Unit) {
+        when (type) {
             KAKAO -> {
                 UserApiClient.instance.logout { error ->
-                    if(error != null){
-                        Log.e("lys","kakao logout error > ${error.message}")
+                    if (error != null) {
+                        Log.e("lys", "kakao logout error > ${error.message}")
                         callBack(false)
                     } else {
-                        Log.d("lys","kakao logout success")
+                        Log.d("lys", "kakao logout success")
                         callBack(true)
                     }
                 }
@@ -131,8 +150,8 @@ object AuthUtil {
         }
     }
 
-    fun snsSignout(context: Context,type: String, callBack: (Boolean) -> Unit){
-        when(type){
+    fun snsSignout(context: Context, type: String, callBack: (Boolean) -> Unit) {
+        when (type) {
             KAKAO -> {
                 UserApiClient.instance.unlink { error ->
                     if (error != null) {
@@ -152,7 +171,10 @@ object AuthUtil {
                     }
 
                     override fun onError(errorCode: Int, message: String) {
-                        Log.e("lys", "naver delete oath onError > errorCode:${errorCode} message:$message")
+                        Log.e(
+                            "lys",
+                            "naver delete oath onError > errorCode:${errorCode} message:$message"
+                        )
                         callBack(false)
                     }
 

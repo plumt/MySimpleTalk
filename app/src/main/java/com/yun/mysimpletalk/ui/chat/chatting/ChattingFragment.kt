@@ -6,6 +6,7 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
@@ -39,7 +40,12 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             sv.hideBottomNav()
         }
         arguments?.run {
+            viewModel.friendInfo = sVM.friendUsers.value!!.find { it.userId == (getString("userId") ?: "") }!!
             chatRoomSetting(getString("userId") ?: "")
+        }
+
+        binding.btnTest.setOnClickListener {
+            selectChatList(lastChat)
         }
 
         binding.rvChat.apply {
@@ -61,36 +67,52 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
         }
 
         viewModel.roomId.observe(viewLifecycleOwner) {
-            if (it != "") selectChatList()
+            if (it != "") selectChatList(null)
         }
     }
 
     var chatListener: ListenerRegistration? = null
+    var lastChat: DocumentSnapshot? = null
 
-    private fun selectChatList() {
+    private fun selectChatList(lastChat: DocumentSnapshot?) {
         FirebaseFirestore.getInstance().collection(CHATS)
             .document(viewModel.roomId.value!!)
             .collection("list")
             .orderBy("timestamp", Query.Direction.DESCENDING)
+            .let { if (lastChat != null) it.startAfter(lastChat) else it }
             .limit(5) // 나중에 최대한으로 수정할 것
             .get()
             .addOnCompleteListener {
                 if (it.isSuccessful && it.exception == null) {
-                    it.result.documents.forEachIndexed { index, snap ->
-
-                        val date = (snap.data!!["timestamp"] as Timestamp)
-                        viewModel.chatting.add(
-                            ChatModel.Chatting(viewModel.chatting.sizes(), snap.data!!["id"] as String,"",
-                            snap.data!!["message"] as String, date,snap.data!!["read"] as String)
+                    val chatList = arrayListOf<ChatModel.Chatting>()
+                    it.result.documents.forEach { snap ->
+                        val date = (snap["timestamp"] as Timestamp)
+                        val index = viewModel.chatting.sizes() + chatList.size
+                        val id = snap.data!!["id"] as String
+                        val message = snap.data!!["message"] as String
+                        val read = snap.data!!["read"] as String
+                        chatList.add(
+                            ChatModel.Chatting(
+                                index, id, chatName(snap), message, date, read
+                            )
                         )
-                        Log.d("lys", "message > ${viewModel.chatting.value!![viewModel.chatting.sizes()-1]}")
+                        this.lastChat = snap
                     }
+                    chatList.reverse()
+                    chatList.addAll(viewModel.chatting.value!!)
+                    viewModel.chatting.value = chatList
+                    Log.d("lys", "chat > ${viewModel.chatting.value}")
+                    Log.d("lys", "chat[0] > ${viewModel.chatting.value!![0]}")
                     selectChatListListener()
                 } else {
-                    Log.e("lys","error > ${it.exception?.message}")
+                    Log.e("lys", "error > ${it.exception?.message}")
                 }
             }
     }
+
+    private fun chatName(snap: DocumentSnapshot): String =
+        if (snap.data!!["id"] == sVM.myId.value!!) "" else viewModel.friendInfo.nickName
+
 
     private fun selectChatListListener() {
         if (chatListener != null) return
@@ -102,19 +124,20 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             .addSnapshotListener { value, error ->
                 if (value == null) return@addSnapshotListener
                 if (value.documents[0]["timestamp"] != null) {
-                    val date = (value.documents[0]["timestamp"] as Timestamp)
-                    val temp = arrayListOf<ChatModel.Chatting>()
-                    if(viewModel.chatting.value!!.any { it.timestamp != date && it.message == value.documents[0].data!!["message"] as String }){
-                        temp.add(ChatModel.Chatting(viewModel.chatting.sizes(), value.documents[0].data!!["id"] as String,"",
-                            value.documents[0].data!!["message"] as String, date,value.documents[0].data!!["read"] as String))
-                        temp.addAll(viewModel.chatting.value!!)
-                        viewModel.chatting.value = temp
-                        Log.d(
-                            "lys",
-                            "select message(${value.documents.size}) > ${value.documents[0].data}"
+                    val data = value.documents[0]
+                    val date = data["timestamp"] as Timestamp
+                    val id = data["id"] as String
+                    val message = data["message"] as String
+                    val read = data["read"] as String
+                    if (viewModel.chatting.value!![viewModel.chatting.sizes() - 1].timestamp == date
+                        && viewModel.chatting.value!![viewModel.chatting.sizes() - 1].message == message
+                    ) return@addSnapshotListener
+                    viewModel.chatting.add(
+                        ChatModel.Chatting(
+                            viewModel.chatting.sizes(), id, "", message, date, read
                         )
-                    }
-
+                    )
+                    Log.d("lys", "viewModel.chatting > ${viewModel.chatting.value}")
                 }
             }
     }
