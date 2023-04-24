@@ -28,7 +28,7 @@ class ChatModel {
         var skip: List<Boolean>
     ) : Item() {
         fun dateConvert(date: Timestamp): String {
-            val formatter = SimpleDateFormat("a hh:mm")
+            val formatter = SimpleDateFormat("a h:m")
             return formatter.format(Date(date.seconds * 1000))
         }
     }

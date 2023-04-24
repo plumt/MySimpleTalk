@@ -3,6 +3,7 @@ package com.yun.mysimpletalk.ui.chat.chatting
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.tasks.Task
@@ -47,9 +48,9 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             chatRoomSetting(getString("userId") ?: "")
         }
 
-        binding.btnTest.setOnClickListener {
-            selectChatList(lastChat)
-        }
+//        binding.btnTest.setOnClickListener {
+//            selectChatList(lastChat)
+//        }
 
         binding.rvChat.apply {
             (this.layoutManager as LinearLayoutManager).stackFromEnd = true
@@ -64,8 +65,15 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
         }
 
         binding.btnSend.setOnClickListener {
-            sendMessage(viewModel.roomId.value!!, sVM.myId.value!!, "test") {
-                Log.d("lys", "sendMessage > $it")
+            viewModel.touchFlag.value = false
+            sendMessage(
+                viewModel.roomId.value!!,
+                sVM.myId.value!!,
+                viewModel.message.value!!
+            ) { success ->
+                viewModel.touchFlag.value = true
+                if (success) viewModel.message.value = ""
+                else Toast.makeText(requireContext(), "전송을 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -83,7 +91,7 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             .collection("list")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .let { if (lastChat != null) it.startAfter(lastChat) else it }
-            .limit(5) // 나중에 최대한으로 수정할 것
+            .limit(15) // 나중에 최대한으로 수정할 것
             .get()
             .addOnCompleteListener {
                 if (it.isSuccessful && it.exception == null) {
@@ -205,7 +213,7 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
                         ChatModel.Chatting(
                             viewModel.chatting.sizes(),
                             id,
-                            "",
+                            chatName(value.documents[0]),
                             message,
                             date,
                             read,
@@ -213,6 +221,8 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
                             isSkip
                         )
                     )
+                    //TODO 현재 스크롤 위치를 보고, 가장 하단이면 자연스레 화면 스크롤이 밑으로 내려가게
+                    //TODO 현재 스크롤이 가장 하단이 아니면 새로운 메시지가 왔다는 작은 표시가 있으면 좋을듯
                     Log.d("lys", "viewModel.chatting > ${viewModel.chatting.value}")
                 }
             }

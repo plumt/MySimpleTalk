@@ -16,5 +16,9 @@ class ChattingViewModel @Inject constructor(application: Application) : BaseView
 
     val roomId = MutableLiveData("")
 
+    val message = MutableLiveData("")
+
+    val touchFlag = MutableLiveData(true)
+
     lateinit var friendInfo: UserModel.User
 }
