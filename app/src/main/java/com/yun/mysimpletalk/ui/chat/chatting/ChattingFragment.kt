@@ -22,6 +22,9 @@ import com.yun.mysimpletalk.ui.main.MainActivity
 import com.yun.mysimpletalk.util.FirebaseUtil.selectChatRoom
 import com.yun.mysimpletalk.util.FirebaseUtil.sendMessage
 import dagger.hilt.android.AndroidEntryPoint
+import okhttp3.internal.notifyAll
+import java.text.SimpleDateFormat
+import java.util.*
 
 @AndroidEntryPoint
 class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel>() {
@@ -40,7 +43,8 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             sv.hideBottomNav()
         }
         arguments?.run {
-            viewModel.friendInfo = sVM.friendUsers.value!!.find { it.userId == (getString("userId") ?: "") }!!
+            viewModel.friendInfo =
+                sVM.friendUsers.value!!.find { it.userId == (getString("userId") ?: "") }!!
             chatRoomSetting(getString("userId") ?: "")
         }
 
@@ -85,15 +89,74 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             .addOnCompleteListener {
                 if (it.isSuccessful && it.exception == null) {
                     val chatList = arrayListOf<ChatModel.Chatting>()
-                    it.result.documents.forEach { snap ->
-                        val date = (snap["timestamp"] as Timestamp)
+                    it.result.documents.forEachIndexed { _index, snap ->
+                        val date = snap["timestamp"] as Timestamp
                         val index = viewModel.chatting.sizes() + chatList.size
                         val id = snap.data!!["id"] as String
                         val message = snap.data!!["message"] as String
                         val read = snap.data!!["read"] as String
+
+                        val isSkip = arrayListOf<Boolean>()
+
+                        val formatter = SimpleDateFormat("HH:mm")
+                        var milliTime = Date(date.seconds * 1000)
+//                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                        var now = formatter.format(milliTime)
+                        Log.d("lys", "dateString > $now")
+                        if (_index < it.result.size() - 1) {
+                            // 연속된 시간(시, 분) 메시지의 경우 친구 이름과 프로필 사진은 제일 첫 번째 것을 사용
+                            milliTime =
+                                Date((it.result.documents[_index + 1]["timestamp"] as Timestamp).seconds * 1000)
+                            val before = formatter.format(milliTime)
+                            isSkip.add(before == now && id == it.result.documents[_index + 1]["id"] as String)
+                        } else {
+                            isSkip.add(false)
+                            if (viewModel.chatting.sizes() > 0) {
+                                milliTime =
+                                    Date((it.result.documents[0]["timestamp"] as Timestamp).seconds * 1000)
+                                now = formatter.format(milliTime)
+                                milliTime =
+                                    Date(viewModel.chatting.value!![0].timestamp.seconds * 1000)
+                                val before = formatter.format(milliTime)
+                                var skip = arrayListOf<Boolean>()
+                                skip.add(before == now && id == viewModel.chatting.value!![0].userId)
+                                skip.add(viewModel.chatting.value!![0].skip[1])
+                                viewModel.chatting.value!![0].skip = skip
+                                Log.d(
+                                    "lys",
+                                    "viewModel.chatting.value!![0].skip > ${viewModel.chatting.value!![0].skip} | ${viewModel.chatting.value!![0].message}"
+                                )
+                                binding.rvChat.adapter!!.notifyItemChanged(0)
+                            }
+                        }
+                        if (_index == 0) {
+                            if (viewModel.chatting.sizes() == 0) {
+                                isSkip.add(false)
+                            } else {
+                                milliTime =
+                                    Date(viewModel.chatting.value!![0].timestamp.seconds * 1000)
+                                val before = formatter.format(milliTime)
+                                isSkip.add(before == now && id == viewModel.chatting.value!![0].userId)
+                            }
+//                            isSkip.add(false)
+                        } else {
+                            // 연속된 시간(시, 분) 메시지의 경우 마지막 메시지에만 날짜 노출
+                            milliTime =
+                                Date((it.result.documents[_index - 1]["timestamp"] as Timestamp).seconds * 1000)
+                            val after = formatter.format(milliTime)
+                            isSkip.add(after == now && id == it.result.documents[_index - 1]["id"] as String)
+                        }
+
                         chatList.add(
                             ChatModel.Chatting(
-                                index, id, chatName(snap), message, date, read
+                                index,
+                                id,
+                                chatName(snap),
+                                message,
+                                date,
+                                read,
+                                viewModel.friendInfo.profile,
+                                isSkip
                             )
                         )
                         this.lastChat = snap
@@ -132,9 +195,32 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
                     if (viewModel.chatting.value!![viewModel.chatting.sizes() - 1].timestamp == date
                         && viewModel.chatting.value!![viewModel.chatting.sizes() - 1].message == message
                     ) return@addSnapshotListener
+
+                    val isSkip = arrayListOf<Boolean>()
+                    isSkip.add(false)
+                    isSkip.add(false)
+                    if (viewModel.chatting.sizes() > 0) {
+                        val formatter = SimpleDateFormat("HH:mm")
+                        var milliTime =
+                            Date(viewModel.chatting.value!![viewModel.chatting.sizes() - 1].timestamp.seconds * 1000)
+                        var before = formatter.format(milliTime)
+
+                        milliTime = Date(date.seconds * 1000)
+                        var now = formatter.format(milliTime)
+                        viewModel.chatting.value!![viewModel.chatting.sizes() - 1].skip =
+                            arrayListOf(false, before == now)
+                        binding.rvChat.adapter!!.notifyItemChanged(viewModel.chatting.sizes() - 1)
+                    }
                     viewModel.chatting.add(
                         ChatModel.Chatting(
-                            viewModel.chatting.sizes(), id, "", message, date, read
+                            viewModel.chatting.sizes(),
+                            id,
+                            "",
+                            message,
+                            date,
+                            read,
+                            viewModel.friendInfo.profile,
+                            isSkip
                         )
                     )
                     Log.d("lys", "viewModel.chatting > ${viewModel.chatting.value}")
