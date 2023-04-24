@@ -5,11 +5,9 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.*
 import com.yun.mysimpletalk.R
 import com.yun.mysimpletalk.BR
 import com.yun.mysimpletalk.base.BaseFragment
@@ -25,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import okhttp3.internal.notifyAll
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel>() {
@@ -89,89 +88,80 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
             .addOnCompleteListener {
                 if (it.isSuccessful && it.exception == null) {
                     val chatList = arrayListOf<ChatModel.Chatting>()
+                    val formatter = SimpleDateFormat("HH:mm")
+
                     it.result.documents.forEachIndexed { _index, snap ->
                         val date = snap["timestamp"] as Timestamp
                         val index = viewModel.chatting.sizes() + chatList.size
                         val id = snap.data!!["id"] as String
-                        val message = snap.data!!["message"] as String
-                        val read = snap.data!!["read"] as String
-
                         val isSkip = arrayListOf<Boolean>()
-
-                        val formatter = SimpleDateFormat("HH:mm")
                         var milliTime = Date(date.seconds * 1000)
 //                        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                         var now = formatter.format(milliTime)
-                        Log.d("lys", "dateString > $now")
                         if (_index < it.result.size() - 1) {
                             // 연속된 시간(시, 분) 메시지의 경우 친구 이름과 프로필 사진은 제일 첫 번째 것을 사용
-                            milliTime =
-                                Date((it.result.documents[_index + 1]["timestamp"] as Timestamp).seconds * 1000)
+                            milliTime = timestampConvert(it, _index + 1)
                             val before = formatter.format(milliTime)
                             isSkip.add(before == now && id == it.result.documents[_index + 1]["id"] as String)
                         } else {
                             isSkip.add(false)
                             if (viewModel.chatting.sizes() > 0) {
-                                milliTime =
-                                    Date((it.result.documents[0]["timestamp"] as Timestamp).seconds * 1000)
+                                milliTime = timestampConvert(it, 0)
                                 now = formatter.format(milliTime)
-                                milliTime =
-                                    Date(viewModel.chatting.value!![0].timestamp.seconds * 1000)
+                                milliTime = timestampConvert()
                                 val before = formatter.format(milliTime)
-                                var skip = arrayListOf<Boolean>()
+                                val skip = arrayListOf<Boolean>()
                                 skip.add(before == now && id == viewModel.chatting.value!![0].userId)
                                 skip.add(viewModel.chatting.value!![0].skip[1])
                                 viewModel.chatting.value!![0].skip = skip
-                                Log.d(
-                                    "lys",
-                                    "viewModel.chatting.value!![0].skip > ${viewModel.chatting.value!![0].skip} | ${viewModel.chatting.value!![0].message}"
-                                )
                                 binding.rvChat.adapter!!.notifyItemChanged(0)
                             }
                         }
                         if (_index == 0) {
-                            if (viewModel.chatting.sizes() == 0) {
-                                isSkip.add(false)
-                            } else {
-                                milliTime =
-                                    Date(viewModel.chatting.value!![0].timestamp.seconds * 1000)
+                            if (viewModel.chatting.sizes() == 0) isSkip.add(false)
+                            else {
+                                milliTime = timestampConvert()
                                 val before = formatter.format(milliTime)
                                 isSkip.add(before == now && id == viewModel.chatting.value!![0].userId)
                             }
-//                            isSkip.add(false)
                         } else {
                             // 연속된 시간(시, 분) 메시지의 경우 마지막 메시지에만 날짜 노출
-                            milliTime =
-                                Date((it.result.documents[_index - 1]["timestamp"] as Timestamp).seconds * 1000)
+                            milliTime = timestampConvert(it, _index - 1)
                             val after = formatter.format(milliTime)
                             isSkip.add(after == now && id == it.result.documents[_index - 1]["id"] as String)
                         }
-
-                        chatList.add(
-                            ChatModel.Chatting(
-                                index,
-                                id,
-                                chatName(snap),
-                                message,
-                                date,
-                                read,
-                                viewModel.friendInfo.profile,
-                                isSkip
-                            )
-                        )
+                        chatList.add(chatPrams(index, snap, isSkip))
                         this.lastChat = snap
                     }
                     chatList.reverse()
                     chatList.addAll(viewModel.chatting.value!!)
                     viewModel.chatting.value = chatList
-                    Log.d("lys", "chat > ${viewModel.chatting.value}")
-                    Log.d("lys", "chat[0] > ${viewModel.chatting.value!![0]}")
                     selectChatListListener()
-                } else {
-                    Log.e("lys", "error > ${it.exception?.message}")
-                }
+                } else Log.e("lys", "error > ${it.exception?.message}")
             }
     }
+
+    private fun timestampConvert() =
+        Date(viewModel.chatting.value!![0].timestamp.seconds * 1000)
+
+    private fun timestampConvert(snap: Task<QuerySnapshot>, index: Int) =
+        Date((snap.result.documents[index]["timestamp"] as Timestamp).seconds * 1000)
+
+    private fun chatPrams(
+        index: Int,
+        snap: DocumentSnapshot,
+        isSkip: List<Boolean>
+    ): ChatModel.Chatting =
+        ChatModel.Chatting(
+            index,
+            snap.data!!["id"] as String,
+            chatName(snap),
+            message = snap.data!!["message"] as String,
+            snap["timestamp"] as Timestamp,
+            snap.data!!["read"] as String,
+            viewModel.friendInfo.profile,
+            isSkip
+        )
 
     private fun chatName(snap: DocumentSnapshot): String =
         if (snap.data!!["id"] == sVM.myId.value!!) "" else viewModel.friendInfo.nickName
