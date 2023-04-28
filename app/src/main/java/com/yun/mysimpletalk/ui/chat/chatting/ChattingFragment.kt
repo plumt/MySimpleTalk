@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.*
@@ -62,6 +63,17 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
                 override fun onItemClick(item: ChatModel.Chatting, view: View) {}
                 override fun onItemLongClick(item: ChatModel.Chatting, view: View): Boolean = true
             }
+            addOnScrollListener(object : RecyclerView.OnScrollListener(){
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    viewModel.isBottom = !recyclerView.canScrollVertically(1)
+                    if(viewModel.isBottom){
+                        Log.d("lys","바닥!")
+                    } else if(!recyclerView.canScrollVertically(-1) && !viewModel.isLoading.value!!){
+                        selectChatList(lastChat)
+                    }
+                }
+            })
         }
 
         binding.btnSend.setOnClickListener {
@@ -86,12 +98,13 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
     var lastChat: DocumentSnapshot? = null
 
     private fun selectChatList(lastChat: DocumentSnapshot?) {
+        viewModel.isLoading.value = true
         FirebaseFirestore.getInstance().collection(CHATS)
             .document(viewModel.roomId.value!!)
             .collection("list")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .let { if (lastChat != null) it.startAfter(lastChat) else it }
-            .limit(15) // 나중에 최대한으로 수정할 것
+            .limit(16) // 나중에 최대한으로 수정할 것
             .get()
             .addOnCompleteListener {
                 if (it.isSuccessful && it.exception == null) {
@@ -143,7 +156,11 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
                     }
                     chatList.reverse()
                     chatList.addAll(viewModel.chatting.value!!)
+                    val beforeSize = viewModel.chatting.sizes()
                     viewModel.chatting.value = chatList
+                    binding.rvChat.adapter!!.notifyItemRangeChanged(0, beforeSize)
+
+                    viewModel.isLoading.value = false
                     selectChatListListener()
                 } else Log.e("lys", "error > ${it.exception?.message}")
             }
@@ -221,8 +238,11 @@ class ChattingFragment : BaseFragment<FragmentChattingBinding, ChattingViewModel
                             isSkip
                         )
                     )
+                    if(viewModel.isBottom) binding.rvChat.scrollToPosition(viewModel.chatting.sizes() -1)
                     //TODO 현재 스크롤 위치를 보고, 가장 하단이면 자연스레 화면 스크롤이 밑으로 내려가게
                     //TODO 현재 스크롤이 가장 하단이 아니면 새로운 메시지가 왔다는 작은 표시가 있으면 좋을듯
+                    //TODO 무결성 때문에 firebase firestore id 관련 로직 변경 요함
+                    //TODO 챗 새로 불러올때 스크롤 위치 이상하게 잡는거 수정해야 함
                     Log.d("lys", "viewModel.chatting > ${viewModel.chatting.value}")
                 }
             }

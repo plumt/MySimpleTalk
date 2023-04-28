@@ -12,6 +12,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ChattingViewModel @Inject constructor(application: Application) : BaseViewModel(application) {
 
+    val isLoading = MutableLiveData(true)
+
     val chatting = ListLiveData<ChatModel.Chatting>()
 
     val roomId = MutableLiveData("")
@@ -21,4 +23,7 @@ class ChattingViewModel @Inject constructor(application: Application) : BaseView
     val touchFlag = MutableLiveData(true)
 
     lateinit var friendInfo: UserModel.User
+
+    var isBottom = true
+
 }
